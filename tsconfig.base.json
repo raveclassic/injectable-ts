@@ -1,9 +1,10 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "strict": true,
     "rootDir": ".",
     "sourceMap": true,
-    "declaration": false,
+    "declaration": true,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -11,10 +12,12 @@
     "target": "es2015",
     "module": "esnext",
     "lib": ["es2017", "dom"],
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
+    "skipLibCheck": false,
+    "skipDefaultLibCheck": false,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@injectable-ts/core": ["packages/core/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
