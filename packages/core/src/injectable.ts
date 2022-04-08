@@ -1,3 +1,4 @@
+import { memoMany } from '@frp-ts/utils'
 import { Merge, NoInfer, UnionToIntersection } from './utils'
 
 export interface UnknownDependency {
@@ -42,9 +43,11 @@ type InjectableDependenciesStructure<Target> = Target extends Injectable<
   ? Dependencies
   : never
 
-export type InjectableDependencies<Target> = Flatten<
-  InjectableDependenciesStructure<Target>
->
+export type InjectableDependencies<Target> = {
+  readonly [Key in keyof Flatten<
+    InjectableDependenciesStructure<Target>
+  >]: Flatten<InjectableDependenciesStructure<Target>>[Key]
+}
 
 type MapInjectablesToValues<
   Targets extends readonly Injectable<unknown, unknown>[]
@@ -88,12 +91,12 @@ type MergeDependenciesWithParent<
 type MergeDependencies<Inputs extends readonly Injectable<unknown, unknown>[]> =
   UnionToIntersection<MapInjectablesToDependenciesStructures<Inputs>[number]>
 
-export declare function injectable<
-  Token extends PropertyKey,
+export function injectable<
+  Name extends PropertyKey,
   Inputs extends readonly Injectable<unknown, unknown>[],
   Value
 >(
-  token: Token,
+  name: Name,
   ...args: readonly [
     ...Inputs,
     (...values: MapInjectablesToValues<Inputs>) => Value
@@ -102,13 +105,13 @@ export declare function injectable<
   {
     readonly [Key in keyof MergeDependenciesWithParent<
       Inputs,
-      Token,
+      Name,
       Value
-    >]: MergeDependenciesWithParent<Inputs, Token, Value>[Key]
+    >]: MergeDependenciesWithParent<Inputs, Name, Value>[Key]
   },
   Value
 >
-export declare function injectable<
+export function injectable<
   Inputs extends readonly Injectable<unknown, unknown>[],
   Value
 >(
@@ -122,6 +125,30 @@ export declare function injectable<
   },
   Value
 >
+export function injectable(
+  ...args: readonly unknown[]
+): Injectable<UnknownDependencies, unknown> {
+  const name = typeof args[0] === 'string' ? args[0] : undefined
+  const injectables: readonly Injectable<UnknownDependencies, unknown>[] =
+    // eslint-disable-next-line no-restricted-syntax
+    args.slice(name !== undefined ? 1 : 0, args.length - 1) as never
+  // eslint-disable-next-line no-restricted-syntax
+  const project: (...values: readonly unknown[]) => unknown = args[
+    args.length - 1
+  ] as never
+
+  const memoizedProject = memoMany(project)
+  return (dependencies: Record<PropertyKey, unknown>) => {
+    if (name !== undefined) {
+      const override = dependencies[name]
+      if (override !== undefined) {
+        return override
+      }
+    }
+    const values = injectables.map((injectable) => injectable(dependencies))
+    return memoizedProject(...values)
+  }
+}
 
 // type Deps = {
 //   d: {

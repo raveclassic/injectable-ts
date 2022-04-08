@@ -1,5 +1,8 @@
 {
   "name": "@injectable-ts/core",
   "version": "0.0.1",
-  "type": "commonjs"
+  "type": "commonjs",
+  "dependencies": {
+    "@frp-ts/utils": "^1.0.0-alpha.15"
+  }
 }

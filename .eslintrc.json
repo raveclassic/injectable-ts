@@ -5,6 +5,7 @@
     "jest",
     "import",
     "unicorn",
+    "expect-type",
     "@nrwl/nx"
   ],
   "parserOptions": {
@@ -35,7 +36,8 @@
         "plugin:@nrwl/nx/typescript",
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended"
+        "plugin:@typescript-eslint/recommended",
+        "plugin:eslint-plugin-expect-type/recommended"
       ],
       "rules": {
         "@typescript-eslint/semi": ["error", "never"],
@@ -129,7 +131,8 @@
             // allows empty `catch` blocks
             "allowEmptyCatch": true
           }
-        ]
+        ],
+        "expect-type/expect": ["error", { "disableExpectTypeSnapshotFix": true}]
       }
     },
     {

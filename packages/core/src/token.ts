@@ -3,10 +3,10 @@ import { Injectable } from './injectable'
 export const TOKEN_ACCESSOR_KEY = '@injectable-ts/core//TOKEN_ACCESSOR'
 
 export interface TokenAccessor {
-  <Token extends PropertyKey, Target extends Record<Token, unknown>>(
-    target: Target,
-    token: Token
-  ): Target[Token]
+  <Name extends PropertyKey, Dependencies extends Record<Name, unknown>>(
+    dependencies: Dependencies,
+    name: Name
+  ): Dependencies[Name]
 }
 
 type TokenDependencies<Name extends PropertyKey, Type> = Record<
