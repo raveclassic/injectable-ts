@@ -1,14 +1,14 @@
-interface UnknownDependency {
+import { Merge, NoInfer, UnionToIntersection } from './utils'
+
+export interface UnknownDependency {
   readonly parent: PropertyKey | never
   readonly required: boolean
   readonly type: unknown
 }
 
-interface UnknownDependencies {
+export interface UnknownDependencies {
   readonly [Name: string]: UnknownDependency
 }
-
-type NoInfer<T> = T extends infer S ? S : never
 
 type RunFlatten<Dependencies extends UnknownDependencies> = {
   readonly [Key in keyof Dependencies as Dependencies[Key]['required'] extends true
@@ -19,9 +19,7 @@ type RunFlatten<Dependencies extends UnknownDependencies> = {
     ? Key
     : never]?: Dependencies[Key]['type']
 }
-type Merge<Target> = {
-  readonly [Key in keyof Target]: Target[Key]
-}
+
 type Flatten<Dependencies> = Dependencies extends UnknownDependencies
   ? Merge<RunFlatten<Dependencies>>
   : never
@@ -60,40 +58,6 @@ type MapInjectablesToDependenciesStructures<Targets> = {
   >
 }
 
-type UnionToIntersection<U> = (
-  U extends unknown ? (k: U) => void : never
-) extends (k: infer I) => void
-  ? I
-  : never
-
-export const TOKEN_ACCESSOR_KEY = '@injectable-ts/core//TOKEN_ACCESSOR'
-export interface TokenAccessor {
-  <Token extends PropertyKey, Target extends Record<Token, unknown>>(
-    target: Target,
-    token: Token
-  ): Target[Token]
-}
-type TokenDependencies<Name extends PropertyKey, Type> = Record<
-  Name,
-  { type: Type; parent: never; required: true }
-> &
-  Record<
-    typeof TOKEN_ACCESSOR_KEY,
-    { type: TokenAccessor; parent: Name; required: false }
-  >
-
-export declare function token<Name extends PropertyKey>(
-  name: Name
-): <Type = never>() => Injectable<
-  {
-    readonly [Key in keyof TokenDependencies<Name, Type>]: TokenDependencies<
-      Name,
-      Type
-    >[Key]
-  },
-  Type
->
-
 type WrapWithParent<Dependencies, Parent extends PropertyKey> = {
   readonly [Name in keyof Dependencies]: Dependencies[Name] extends {
     readonly parent: never
@@ -103,6 +67,7 @@ type WrapWithParent<Dependencies, Parent extends PropertyKey> = {
       }
     : Dependencies[Name]
 }
+
 type MergeDependenciesWithParent<
   Inputs extends readonly Injectable<unknown, unknown>[],
   Parent extends PropertyKey,
@@ -156,57 +121,6 @@ export declare function injectable<
     readonly [Key in keyof MergeDependencies<Inputs>]: MergeDependencies<Inputs>[Key]
   },
   Value
->
-
-type Eq<A, B> = [A, B] extends [B, A] ? true : false
-
-type ShouldRemove<
-  Dependencies extends UnknownDependencies,
-  CurrentDependency extends keyof Dependencies,
-  DependenciesToOmit extends keyof Dependencies
-> = Eq<DependenciesToOmit, CurrentDependency> extends true
-  ? true
-  : Dependencies[CurrentDependency]['parent'] extends never
-  ? false
-  : Dependencies[CurrentDependency]['parent'] extends keyof Dependencies
-  ? ShouldRemove<
-      Dependencies,
-      Dependencies[CurrentDependency]['parent'],
-      DependenciesToOmit
-    >
-  : false
-
-type OmitDependencies<
-  Dependencies extends UnknownDependencies,
-  DependenciesToOmit extends keyof Dependencies
-> = {
-  readonly [Current in keyof Dependencies as ShouldRemove<
-    Dependencies,
-    Current,
-    DependenciesToOmit
-  > extends true
-    ? never
-    : Current]: Dependencies[Current]
-}
-
-export declare function provide<
-  Dependencies extends UnknownDependencies,
-  Value
->(
-  input: Injectable<Dependencies, Value>
-): <Keys extends keyof Dependencies>() => Injectable<
-  {
-    readonly [Key in keyof OmitDependencies<
-      Dependencies,
-      Keys
-    >]: OmitDependencies<Dependencies, Keys>[Key]
-  },
-  Injectable<
-    {
-      readonly [Key in Keys]: Dependencies[Key]
-    },
-    Value
-  >
 >
 
 // type Deps = {
