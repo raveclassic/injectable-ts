@@ -1,51 +1,38 @@
-import { Eq } from './utils'
-import { Injectable, UnknownDependencies } from './injectable'
+import { Flatten, Injectable, UnknownDependencyTree } from './injectable'
 
-type ShouldRemove<
-  Dependencies extends UnknownDependencies,
-  CurrentDependency extends keyof Dependencies,
-  DependenciesToOmit extends keyof Dependencies
-> = Eq<DependenciesToOmit, CurrentDependency> extends true
-  ? true
-  : Dependencies[CurrentDependency]['parent'] extends never
-  ? false
-  : Dependencies[CurrentDependency]['parent'] extends keyof Dependencies
-  ? ShouldRemove<
-      Dependencies,
-      Dependencies[CurrentDependency]['parent'],
-      DependenciesToOmit
-    >
-  : false
-
-type OmitDependencies<
-  Dependencies extends UnknownDependencies,
-  DependenciesToOmit extends keyof Dependencies
+type RunOmitInChildren<
+  Children extends readonly UnknownDependencyTree[],
+  Keys
 > = {
-  readonly [Current in keyof Dependencies as ShouldRemove<
-    Dependencies,
-    Current,
-    DependenciesToOmit
-  > extends true
-    ? never
-    : Current]: Dependencies[Current]
+  readonly [Index in keyof Children]: RunOmitDependencies<Children[Index], Keys>
 }
 
+type RunOmitDependencies<Tree, Keys> = Tree extends UnknownDependencyTree
+  ? Tree['name'] extends Keys
+    ? never
+    : {
+        readonly type: Tree['type']
+        readonly name: Tree['name']
+        readonly optional: Tree['optional']
+        readonly children: RunOmitInChildren<Tree['children'], Keys>
+      }
+  : never
+
 export declare function provide<
-  Dependencies extends UnknownDependencies,
+  Dependencies extends UnknownDependencyTree,
   Value
 >(
   input: Injectable<Dependencies, Value>
-): <Keys extends keyof Dependencies>() => Injectable<
+): <Keys extends keyof Flatten<Dependencies>>() => Injectable<
   {
-    readonly [Key in keyof OmitDependencies<
+    readonly [Key in keyof RunOmitDependencies<
       Dependencies,
       Keys
-    >]: OmitDependencies<Dependencies, Keys>[Key]
+    >]: RunOmitDependencies<Dependencies, Keys>[Key]
   },
-  Injectable<
-    {
-      readonly [Key in Keys]: Dependencies[Key]
-    },
-    Value
-  >
+  (innerDependencies: {
+    readonly [Key in keyof Flatten<Dependencies> as Key extends Keys
+      ? Key
+      : never]: Flatten<Dependencies>[Key]
+  }) => Value
 >

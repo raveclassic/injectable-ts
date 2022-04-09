@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { injectable, InjectableValue } from './injectable'
+import {
+  injectable,
+  InjectableDependencies,
+  InjectableValue,
+} from './injectable'
 import { token } from './token'
 
 describe('injectable', () => {
@@ -24,36 +28,29 @@ describe('injectable', () => {
         a,
         // $ExpectType "b"
         b
-      ) => 0
+      ) => {
+        expect(a).toBe('a')
+        expect(b).toBe('b')
+      }
     )
   })
-  it('returns result of projection function when called', () => {
-    const a = token('a')<1>()
-    const b = token('b')<2>()
-    const c = injectable(
-      token('a')<1>(),
-      token('b')<2>(),
-      (a, b) => `test ${a} ${b}` as const
-    )
-    // $ExpectType "test 1 2"
+  it('returns result of projection function when called and memorizes it', () => {
+    const project = jest.fn((a: 'a', b: 'b') => `test ${a} ${b}` as const)
+    const c = injectable(token('a')<'a'>(), token('b')<'b'>(), project)
+    // $ExpectType "test a b"
     type t1 = InjectableValue<typeof c>
-    // $ExpectType "test 1 2"
-    const result = c({ a: 1, b: 2 })
+    // $ExpectType "test a b"
+    const result = c({ a: 'a', b: 'b' })
+    expect(result).toBe('test a b')
+    expect(c({ a: 'a', b: 'b' })).toBe('test a b')
+    expect(project).toHaveBeenCalledTimes(1)
   })
-  it('combines multiple injectables', () => {
-    const a = token('a')<'a'>()
-    const b = token('b')<'b'>()
-    const c = injectable(
-      a,
-      b,
-      (
-        // $ExpectType "a"
-        a,
-        // $ExpectType "b"
-        b
-      ) => new Date(a + b)
-    )
-    // $ExpectType Date
-    type t1 = InjectableValue<typeof c>
+  it('forwards dependencies of dependencies', () => {
+    const d = token('d')<'d'>()
+    const e = token('e')<'e'>()
+    const c = injectable(d, (d) => `${d}c` as const)
+    const b = injectable(e, (e) => `${e}b` as const)
+    const a = injectable(b, c, () => 123)
+    type t1 = InjectableDependencies<typeof a>
   })
 })
