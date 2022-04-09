@@ -1,24 +1,23 @@
-import { Eq, Merge, NoInfer, UnionToIntersection } from './utils'
+import { NoInfer, UnionToIntersection } from './utils'
 
 interface UnknownDependencyTree {
   readonly name: PropertyKey | never
   readonly type: unknown
   readonly children: readonly UnknownDependencyTree[]
-  readonly optional?: true
+  readonly optional: boolean
 }
 
 interface Injectable<Dependencies extends UnknownDependencyTree, Value> {
-  (dependencies: NoInfer<Dependencies>): Value
+  (dependencies: NoInfer<RunFlattenTree<Dependencies>>): Value
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type InjectableValue<Target> = Target extends Injectable<any, infer Value>
+type InjectableValue<Target> = Target extends Injectable<never, infer Value>
   ? Value
   : never
 
 type InjectableDependencyTree<Target> = Target extends Injectable<
   infer Tree,
-  any
+  unknown
 >
   ? Tree
   : never
@@ -28,8 +27,7 @@ type InjectableDependencies<Target> = RunFlattenTree<
 >
 
 type MapInjectablesToValues<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Targets extends readonly Injectable<any, unknown>[]
+  Targets extends readonly Injectable<never, unknown>[]
 > = {
   readonly [Index in keyof Targets]: InjectableValue<Targets[Index]>
 }
@@ -37,6 +35,7 @@ type MapInjectablesToValues<
 type Deps = {
   name: 'a'
   type: 'result'
+  optional: false
   children: [
     {
       name: 'b'
@@ -46,6 +45,7 @@ type Deps = {
         {
           name: 'c'
           type: number
+          optional: false
           children: []
         }
       ]
@@ -53,6 +53,7 @@ type Deps = {
     {
       name: 'e'
       type: string
+      optional: false
       children: []
     }
   ]
@@ -61,26 +62,30 @@ declare const deps: Deps
 declare function testDeps(input: UnknownDependencyTree): void
 testDeps(deps)
 
+type PickRequired<DependencyTree extends UnknownDependencyTree> = {
+  readonly [Name in DependencyTree['name'] as DependencyTree['optional'] extends true
+    ? never
+    : Name]: DependencyTree['type']
+}
+type PickOptional<DependencyTree extends UnknownDependencyTree> = {
+  readonly [Name in DependencyTree['name'] as DependencyTree['optional'] extends true
+    ? Name
+    : never]?: DependencyTree['type']
+}
+
 type RunFlattenTree<DependencyTree> = DependencyTree extends never
   ? {
       readonly name: never
       readonly type: never
+      readonly optional: false
       readonly children: readonly []
     }
   : DependencyTree extends UnknownDependencyTree
-  ? Merge<
-      {
-        readonly [Name in DependencyTree['name'] as DependencyTree['optional'] extends true
-          ? never
-          : Name]: DependencyTree['type']
-      } & {
-        readonly [Name in DependencyTree['name'] as DependencyTree['optional'] extends true
-          ? Name
-          : never]?: DependencyTree['type']
-      } & UnionToIntersection<
-          RunFlattenChildren<DependencyTree['children']>[number]
-        >
-    >
+  ? PickRequired<DependencyTree> &
+      PickOptional<DependencyTree> &
+      UnionToIntersection<
+        RunFlattenChildren<DependencyTree['children']>[number]
+      >
   : never
 
 type RunFlattenChildren<Children extends readonly UnknownDependencyTree[]> = {
@@ -110,6 +115,7 @@ declare function token<Name extends PropertyKey>(
   {
     readonly name: Name
     readonly type: Type
+    readonly optional: false
     readonly children: readonly [
       {
         readonly name: typeof TOKEN_ACCESSOR_KEY
@@ -123,13 +129,13 @@ declare function token<Name extends PropertyKey>(
 >
 
 type MergeDependencies<
-  Inputs extends readonly Injectable<any, any>[],
+  Inputs extends readonly Injectable<never, unknown>[],
   Name extends PropertyKey | never,
   Type
 > = {
   readonly name: Name
   readonly type: Type
-  readonly optional: Name extends never ? undefined : true
+  readonly optional: Name extends never ? false : true
   readonly children: {
     readonly [Index in keyof Inputs]: InjectableDependencyTree<Inputs[Index]>
   }
@@ -190,17 +196,21 @@ type A = typeof a
 type AValue = InjectableValue<A>
 type ADependencies = InjectableDependencies<A>
 
-type ATree = InjectableDependencyTree<A>
-
-type OmitInChildren<Children extends readonly UnknownDependencyTree[], Keys> = {
+type RunOmitInChildren<
+  Children extends readonly UnknownDependencyTree[],
+  Keys
+> = {
   readonly [Index in keyof Children]: RunOmitDependencies<Children[Index], Keys>
 }
 
 type RunOmitDependencies<Tree, Keys> = Tree extends UnknownDependencyTree
   ? Tree['name'] extends Keys
     ? never
-    : Omit<Tree, 'children'> & {
-        readonly children: OmitInChildren<Tree['children'], Keys>
+    : {
+        readonly type: Tree['type']
+        readonly name: Tree['name']
+        readonly optional: Tree['optional']
+        readonly children: RunOmitInChildren<Tree['children'], Keys>
       }
   : never
 
