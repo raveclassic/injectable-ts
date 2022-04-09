@@ -11,7 +11,10 @@ interface Injectable<Dependencies extends UnknownDependencyTree, Value> {
   (dependencies: NoInfer<RunFlattenTree<Dependencies>>): Value
 }
 
-type InjectableValue<Target> = Target extends Injectable<never, infer Value>
+type InjectableValue<Target> = Target extends Injectable<
+  UnknownDependencyTree,
+  infer Value
+>
   ? Value
   : never
 
@@ -26,11 +29,12 @@ type InjectableDependencies<Target> = RunFlattenTree<
   InjectableDependencyTree<Target>
 >
 
-type MapInjectablesToValues<
-  Targets extends readonly Injectable<never, unknown>[]
-> = {
+type MapInjectablesToValues<Targets> = {
   readonly [Index in keyof Targets]: InjectableValue<Targets[Index]>
 }
+
+// type List = [Injectable<Deps, string>]
+// type F = MapInjectablesToValues<List>
 
 type Deps = {
   name: 'a'
