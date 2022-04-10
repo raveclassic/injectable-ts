@@ -10,6 +10,9 @@
   "workspaces": [
     "./packages/core"
   ],
+  "engines": {
+    "npm": "8"
+  },
   "devDependencies": {
     "@commitlint/cli": "^16.2.3",
     "@commitlint/config-angular": "^16.2.3",
