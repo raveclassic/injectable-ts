@@ -5,7 +5,12 @@
     "defaultBase": "main"
   },
   "cli": {
-    "defaultCollection": "@nrwl/workspace"
+    "defaultCollection": "@nrwl/js"
+  },
+  "generators": {
+    "@nrwl/js:library": {
+      "buildable": true
+    }
   },
   "tasksRunnerOptions": {
     "default": {
