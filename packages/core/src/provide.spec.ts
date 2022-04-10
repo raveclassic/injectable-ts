@@ -17,8 +17,15 @@ describe('provide', () => {
     )
     const outer = provide(foo)<'a'>()
     type Dependencies = InjectableDependencies<typeof outer>
-    // $ExpectType "foo" | "b"
-    type t1 = Exclude<keyof Dependencies, typeof TOKEN_ACCESSOR_KEY>
+    // FIXME sowehow "nx lint core" runs eslint differently than WebStorm/VSCode
+    // which results in the check below to give false-negative result
+    // because of the order of keys.
+    // Below we expect "foo" | "b" and that's what TS infers
+    // but in "nx lint core" the type is "b" | "foo" which gives the error.
+    // I don't see any good solution for now
+    // so let's wait until this is resolved in "nx".
+    // // $ExpectType "foo" | "b"
+    // type t1 = Exclude<keyof Dependencies, typeof TOKEN_ACCESSOR_KEY>
     // $ExpectType string | undefined
     type t2 = Dependencies['foo']
     // $ExpectType number
