@@ -24,7 +24,8 @@
       "outputs": ["coverage/packages/core"],
       "options": {
         "jestConfig": "packages/core/jest.config.js",
-        "passWithNoTests": true
+        "passWithNoTests": false,
+        "codeCoverage": true
       }
     }
   },
