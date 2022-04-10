@@ -4,7 +4,7 @@ import {
   InjectableDependencies,
   InjectableValue,
 } from './injectable'
-import { token } from './token'
+import { token, TOKEN_ACCESSOR_KEY } from './token'
 
 describe('injectable', () => {
   it('calls projection function without arguments and memorizes result when called without dependencies', () => {
@@ -13,6 +13,8 @@ describe('injectable', () => {
     const value = injectable(project)
     // $ExpectType number
     type t1 = InjectableValue<typeof value>
+    // $ExpectType never
+    type t2 = keyof InjectableDependencies<typeof value>
     // $ExpectType number
     const result = value({})
     expect(result).toBe(time)
@@ -51,6 +53,20 @@ describe('injectable', () => {
     const c = injectable(d, (d) => `${d}c` as const)
     const b = injectable(e, (e) => `${e}b` as const)
     const a = injectable(b, c, () => 123)
-    type t1 = InjectableDependencies<typeof a>
+    const result = a({
+      e: 'e',
+      d: 'd',
+      [TOKEN_ACCESSOR_KEY]: (dependencies, name) => dependencies[name],
+    })
+  })
+  it('supports overrides via "name" argument', () => {
+    const project = jest.fn(() => 'foo value')
+    const foo = injectable('FOO', project)
+    // $ExpectType string | undefined
+    type t1 = InjectableDependencies<typeof foo>['FOO']
+    // $ExpectType string
+    const result = foo({ FOO: 'override' })
+    expect(result).toBe('override')
+    expect(project).not.toHaveBeenCalled()
   })
 })

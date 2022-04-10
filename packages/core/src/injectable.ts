@@ -43,7 +43,7 @@ export type InjectableValue<Target> = Target extends Injectable<
   ? Value
   : never
 
-type InjectableDependencyTree<Target> = Target extends Injectable<
+export type InjectableDependencyTree<Target> = Target extends Injectable<
   infer Tree,
   unknown
 >

@@ -3,8 +3,7 @@ export {
   InjectableValue,
   InjectableDependencies,
   injectable,
-  UnknownDependencies,
-  UnknownDependency,
+  UnknownDependencyTree,
 } from './injectable'
 export { provide } from './provide'
 export { TokenAccessor, TOKEN_ACCESSOR_KEY, token } from './token'
