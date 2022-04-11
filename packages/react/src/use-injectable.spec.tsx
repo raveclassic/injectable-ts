@@ -76,4 +76,20 @@ describe('useInjectable', () => {
     ).toThrow()
     dispose()
   })
+  it('reads dependencies from overrides passed in arguments', () => {
+    const value = token('foo')<string>()
+    const cb = jest.fn()
+    const Component = () => {
+      cb(useInjectable(value, { foo: 'bar' }))
+      return null
+    }
+    render(
+      <StrictMode>
+        <DependenciesProvider value={{ foo: 'foo' }}>
+          <Component />
+        </DependenciesProvider>
+      </StrictMode>
+    )
+    expect(cb).toHaveBeenLastCalledWith('bar')
+  })
 })
