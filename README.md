@@ -8,7 +8,7 @@ This project aims at providing lightweight inversion of control (IoC) and depend
 
 ## Motivation
 
-While concepts of IoC and DI are not new and there are multiple implementations of them available for JavaScript and TypeScript,
+While the concepts of IoC and DI are not new and there are multiple implementations of them available for JavaScript and TypeScript,
 most of them are built around the concept of a single container with all registered dependencies (or multiple containers).
 
 While such approach might work for some projects, it still introduces tight coupling in the code.
