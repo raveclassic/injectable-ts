@@ -8,6 +8,7 @@
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "esModuleInterop": true,
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
@@ -15,8 +16,10 @@
     "skipLibCheck": false,
     "skipDefaultLibCheck": false,
     "baseUrl": ".",
+    "jsx": "react",
     "paths": {
-      "@injectable-ts/core": ["packages/core/src/index.ts"]
+      "@injectable-ts/core": ["packages/core/src/index.ts"],
+      "@injectable-ts/react": ["packages/react/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

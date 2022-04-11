@@ -4,7 +4,8 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "./packages/core"
+    "./packages/core",
+    "./packages/react"
   ],
   "engines": {
     "node": "16",

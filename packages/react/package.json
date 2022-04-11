@@ -1,0 +1,17 @@
+{
+  "name": "@injectable-ts/react",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "dependencies": {
+    "@injectable-ts/core": "^0.0.1"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^13.0.0",
+    "@types/react": "^18.0.1",
+    "react": "^18.0.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  }
+}
+
