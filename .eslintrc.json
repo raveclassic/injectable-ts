@@ -8,9 +8,6 @@
     "expect-type",
     "@nrwl/nx"
   ],
-  "parserOptions": {
-    "project": "tsconfig.base.json"
-  },
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],

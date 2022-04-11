@@ -9,7 +9,8 @@
   },
   "generators": {
     "@nrwl/js:library": {
-      "buildable": true
+      "buildable": true,
+      "setParserOptionsProject": true
     }
   },
   "tasksRunnerOptions": {
