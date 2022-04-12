@@ -5,6 +5,7 @@
   "private": true,
   "workspaces": [
     "./packages/core",
+    "./packages/fp-ts",
     "./packages/react"
   ],
   "engines": {

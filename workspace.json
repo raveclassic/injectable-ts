@@ -2,6 +2,7 @@
   "version": 2,
   "projects": {
     "core": "packages/core",
+    "fp-ts": "packages/fp-ts",
     "react": "packages/react"
   }
 }

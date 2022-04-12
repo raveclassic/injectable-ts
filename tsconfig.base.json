@@ -19,6 +19,7 @@
     "jsx": "react",
     "paths": {
       "@injectable-ts/core": ["packages/core/src/index.ts"],
+      "@injectable-ts/fp-ts": ["packages/fp-ts/src/index.ts"],
       "@injectable-ts/react": ["packages/react/src/index.ts"]
     }
   },
