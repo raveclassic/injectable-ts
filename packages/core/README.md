@@ -5,7 +5,7 @@ This package contains the building blocks for IoC/DI.
 ## Overview
 
 The main idea of the library stands on primitive building blocks - computations.
-A computation is just a function taking some dependencies (or none) and returning some value.
+A computation is just a pure function taking some dependencies (or none) and returning some value.
 
 Let's consider a simple authorization service:
 
@@ -29,12 +29,13 @@ const authService: AuthService = {
 }
 ```
 
-The first thing that catches your eye is that API url is hardcoded.
-That's not an option, and we'd like to configure the instance of the service.
+The first thing that might catch your eye is that API url is hardcoded.
+That's not an option, and we'd like to configure the instance of this service.
 We have several options:
 
 - pass the url together with login and password - doesn't make the API very friendly
-- turn the service constant (`authService`) to a constructor (`newAuthService`) that would take the url in arguments - slightly better but we have to create a global instance somewhere in the root of the app and always reference that instance everywhere in the code
+- turn the service constant (`authService`) to a constructor (`newAuthService`) that would take the url in arguments - slightly better,
+  but we would have to create a global instance somewhere in the root of the app and always reference that instance everywhere in the code
 - inverse the control and inject the url via IoC
 
 So, the best option seems to rely on IoC.
@@ -56,7 +57,7 @@ const authService = injectable(
 ```
 
 Now we need to turn the url into "dependent computation".
-`@injectable-ts/core` ships a special function `token` to require everything we need.
+`@injectable-ts/core` provides a special function `token` to require everything we need.
 We can simply add such token to the list of dependencies of our `authService`
 
 ```typescript
@@ -86,7 +87,7 @@ const service = authService({ API_URL: 'https://my-api.com' })
 
 This is quite boring and doesn't show any benefits at all. _Yet_.
 
-Let's add something more to the code, for instance how about fetching a list of our favourite movies
+Let's add something more interesting to the code, for instance how about fetching a list of our favourite movies
 from the same API and logging them to the console?
 
 We'll need a `MovieService`, a `Logger` and some root entry point of our mini-app that will execute everything:
@@ -157,7 +158,7 @@ Much better, our entry point is now completely unaware of the API_URL!
 However, its implementation is still tightly coupled to implementations of the services and the logger.
 Where's the IoC?
 
-The trick is that `injectable` function can take additional first argument `name` that allows overrides of "default" implementations.
+The trick is that `injectable` function can take additional first argument `name` that allows overrides for default implementations.
 Let's see how it works. We'll need to add names to all our services and to the logger:
 
 ```typescript
@@ -210,3 +211,99 @@ So, to summarize:
 
 3. > all dependencies of `entryPoint` are _statically_ type checked, if we pass something that is not required
    > or forget to pass something that is required, TypeScript throws in _compile time_.
+
+## Design
+
+### Dependencies
+
+As mentioned above, at the core of `@injectable-ts` is built around the concept of computations or, in other words,
+functions from dependencies to values:
+
+```typescript
+export interface Injectable<Tree extends UnknownDependencyTree, Value> {
+  (tree: Flatten<Tree>): Value
+}
+```
+
+Dependencies of a computation are encoded as a tree structure each leaf of which
+holds dependency name, its type and its dependencies.
+
+A computation, as described above, is a pure function that takes dependencies as an argument and produces some value.
+As dependencies in `Injectable` interface type signature are encoded as a tree,
+it wouldn't be very convenient to pass them as an argument directly in a form of tree.
+
+Thus, we convert the tree into a simple `Record` that maps all dependency names to their types.
+This convertor is called `Flatten` and it's intentionally unavailable in the public API of the library,
+as it's an implementation detail.
+
+Using `Injectable` interface we can build infinite dependency graphs.
+
+### Combining injectables
+
+If we have several dependant computations we can combine them into a single computation
+that will implicitly forward all child's dependencies:
+
+```typescript
+const a = token('a')<string>()
+const b = injectable(a, (a) => `${a} b`)
+const c = injectable(a, (a) => `${a} c`)
+const d = injectable(b, c, (b, c) => `${b} ${c} d`)
+```
+
+In the code example above, `d` requires `a` token to be provided:
+
+```typescript
+d({ a: 'foo' }) // returns "foo b foo c d"
+```
+
+This is possible thanks to TypeScript's powerful type system that allows product types (`&`).
+
+If we have a computation `a = aDependencies -> aValue` and computation `b = bDependencies -> bValue`,
+we can build a new computation `c = aDependencies & bDependencies -> f(vValue, bValue)` where `f` is the
+"projection function" (the last argument to `injectable`).
+
+If the first argument to `injectable` is a `PropertyKey` (a string, a number or a symbol), then `injectable`
+adds itself to the dependency graph as an optional dependency so that it can be overridden by the caller:
+
+```typescript
+const a = token('a')<string>()
+const b = injectable('b', a, (a) => `${a} b`)
+const c = injectable(b, (b) => `${b} c`)
+
+c({ a: 'a', b: 'override!' }) // returns "override c"
+```
+
+### Advanced overrides
+
+As seen above, even if we want to completely replace implementation of `b`, at the time of this writing,
+it's technically impossible to change the type of flattened dependencies on-the-fly
+(e.g. remove `a` from dependencies, as `b` is fully replaced).
+
+However, there is a solution - `provide`.
+
+`provide` takes a list of keys of available dependencies and "splits" the computation into 2 nested computations:
+
+1. the "outer" computation that takes all dependencies but passed to `provide`
+2. the "inner" computation that takes only dependencies passed to `provide`
+
+```typescript
+const a = token('a')<string>()
+const b = injectable('b', a, (a) => `${a} b`)
+const c = injectable(b, (b) => `${b} c`)
+const outer = provide(c)<'b'>()
+const inner = withoutB({}) // empty object here as there are no dependencies left
+inner({ b: 'override!' }) // no 'a' required, returns "override c"
+```
+
+The example above might seem awkward, but it makes more sense when used with another `injectable` call:
+
+```typescript
+const a = token('a')<string>()
+const b = injectable('b', a, (a) => `${a} b`)
+const c = injectable(b, (b) => `${b} c`)
+
+const d = injectable(provide(c)<'b'>(), (getC) => getC({ b: 'override' })) // same result as above
+```
+
+Such technique may be really useful when we want to override some part of our dependency graph on-the-fly
+with some dependency that is known only in runtime.
