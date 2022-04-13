@@ -216,7 +216,7 @@ So, to summarize:
 
 ### Dependencies
 
-As mentioned above, at the core of `@injectable-ts` is built around the concept of computations or, in other words,
+As mentioned above, at the core of `@injectable-ts` lies the concept of computations or, in other words,
 functions from dependencies to values:
 
 ```typescript
