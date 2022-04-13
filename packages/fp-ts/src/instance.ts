@@ -1,4 +1,4 @@
-import { Injectable, UnknownDependencyTree } from '@injectable-ts/core'
+import { Injectable } from '@injectable-ts/core'
 import { pipeable } from 'fp-ts/lib/pipeable'
 import { Monad1 } from 'fp-ts/lib/Monad'
 
@@ -7,7 +7,15 @@ export type URI = typeof URI
 
 declare module 'fp-ts/lib/HKT' {
   interface URItoKind<A> {
-    readonly [URI]: Injectable<UnknownDependencyTree, A>
+    readonly [URI]: Injectable<
+      {
+        readonly type: A
+        readonly name: never
+        readonly children: readonly []
+        readonly optional: false
+      },
+      A
+    >
   }
 }
 
