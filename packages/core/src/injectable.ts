@@ -82,7 +82,7 @@ export function injectable<
   {
     readonly [Key in keyof MergeDependencies<
       Inputs,
-      never,
+      Name,
       Value
     >]: MergeDependencies<Inputs, Name, Value>[Key]
   },
