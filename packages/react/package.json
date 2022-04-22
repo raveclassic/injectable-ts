@@ -1,9 +1,9 @@
 {
   "name": "@injectable-ts/react",
-  "version": "0.0.1",
+  "version": "1.0.0-alpha.0",
   "type": "commonjs",
   "dependencies": {
-    "@injectable-ts/core": "^0.0.1"
+    "@injectable-ts/core": "^1.0.0-alpha.0"
   },
   "devDependencies": {
     "@testing-library/react": "^13.0.0",
@@ -14,4 +14,3 @@
     "react": "^18.0.0"
   }
 }
-
