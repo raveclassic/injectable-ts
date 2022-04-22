@@ -291,7 +291,7 @@ const a = token('a')<string>()
 const b = injectable('b', a, (a) => `${a} b`)
 const c = injectable(b, (b) => `${b} c`)
 const outer = provide(c)<'b'>()
-const inner = withoutB({}) // empty object here as there are no dependencies left
+const inner = outer({}) // empty object here as there are no dependencies left
 inner({ b: 'override!' }) // no 'a' required, returns "override c"
 ```
 
