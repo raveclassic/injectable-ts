@@ -4,9 +4,7 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "./packages/core",
-    "./packages/fp-ts",
-    "./packages/react"
+    "./packages/*"
   ],
   "engines": {
     "node": "16",
@@ -45,6 +43,8 @@
     "eslint-plugin-import": "~2.26.0",
     "eslint-plugin-jest": "~26.1.4",
     "eslint-plugin-unicorn": "~42.0.0",
+    "lerna": "^4.0.0",
+    "ngx-deploy-npm": "^3.1.7",
     "husky": "^7.0.4",
     "jest": "~27.5.1",
     "nx": "13.10.1",

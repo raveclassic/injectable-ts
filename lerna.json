@@ -1,0 +1,17 @@
+{
+  "packages": [
+    "./packages/*"
+  ],
+  "version": "0.0.1",
+  "npmClient": "npm",
+  "useWorkspaces": true,
+  "command": {
+    "publish": {
+      "conventionalCommits": true
+    },
+    "version": {
+      "push": false,
+      "conventionalCommits": true
+    }
+  }
+}

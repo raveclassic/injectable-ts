@@ -33,6 +33,30 @@ The project is split into several packages, and you can find documentation for t
 - [@injectable-ts/react](./packages/react/README.md) - bindings for React for better integration with the core
 - more coming soon
 
-## Development
+## Changelog
 
-The project is entirely written in [TypeScript](https://www.typescriptlang.org/) and composed with [nx](https://nx.dev/).
+Read more [here](./CHANGELOG.md)
+
+## Contributions & Development
+
+### Repository structure
+
+This repository is powered by [nx](https://nx.dev/).
+This means that subpackages are built into a single directory `/dist`.
+
+### Publishing
+
+This repository uses [lerna](https://github.com/lerna/lerna) **ONLY** for bumping versions
+until it's supported natively by [nx](https://nx.dev/).
+
+Make sure **NOT** to call `lerna bootstrap` and other commands.
+
+```shell
+lerna version <version>
+```
+
+Then
+
+```shell
+pnpm deploy
+```
