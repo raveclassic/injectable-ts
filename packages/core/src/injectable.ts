@@ -106,7 +106,7 @@ export function injectable<
 export function injectable(
   ...args: readonly unknown[]
 ): Injectable<UnknownDependencyTree, unknown> {
-  const name = typeof args[0] === 'string' ? args[0] : undefined
+  const name = isPropertyKey(args[0]) ? args[0] : undefined
   const injectables: readonly Injectable<UnknownDependencyTree, unknown>[] =
     // eslint-disable-next-line no-restricted-syntax
     args.slice(name !== undefined ? 1 : 0, args.length - 1) as never
@@ -127,3 +127,8 @@ export function injectable(
     return memoizedProject(...values)
   }
 }
+
+const isPropertyKey = (input: unknown): input is PropertyKey =>
+  typeof input === 'string' ||
+  typeof input === 'number' ||
+  typeof input === 'symbol'

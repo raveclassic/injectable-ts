@@ -59,13 +59,34 @@ describe('injectable', () => {
       [TOKEN_ACCESSOR_KEY]: (dependencies, name) => dependencies[name],
     })
   })
-  it('supports overrides via "name" argument', () => {
+  it('supports overrides via "name" argument as string', () => {
     const project = jest.fn(() => 'foo value')
     const foo = injectable('FOO', project)
     // $ExpectType string | undefined
     type t1 = InjectableDependencies<typeof foo>['FOO']
     // $ExpectType string
     const result = foo({ FOO: 'override' })
+    expect(result).toBe('override')
+    expect(project).not.toHaveBeenCalled()
+  })
+  it('supports overrides via "name" argument as number', () => {
+    const project = jest.fn(() => 'foo value')
+    const foo = injectable(123, project)
+    // $ExpectType string | undefined
+    type t1 = InjectableDependencies<typeof foo>[123]
+    // $ExpectType string
+    const result = foo({ 123: 'override' })
+    expect(result).toBe('override')
+    expect(project).not.toHaveBeenCalled()
+  })
+  it('supports overrides via "name" argument as symbol', () => {
+    const project = jest.fn(() => 'foo value')
+    const symbol = Symbol()
+    const foo = injectable(symbol, project)
+    // $ExpectType string | undefined
+    type t1 = InjectableDependencies<typeof foo>[typeof symbol]
+    // $ExpectType string
+    const result = foo({ [symbol]: 'override' })
     expect(result).toBe('override')
     expect(project).not.toHaveBeenCalled()
   })
