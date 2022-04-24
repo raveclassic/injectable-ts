@@ -1,0 +1,32 @@
+{
+  "root": "packages/analyzer",
+  "sourceRoot": "packages/analyzer/src",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/analyzer",
+        "main": "packages/analyzer/src/index.ts",
+        "tsConfig": "packages/analyzer/tsconfig.lib.json",
+        "assets": ["packages/analyzer/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/analyzer/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/analyzer"],
+      "options": {
+        "jestConfig": "packages/analyzer/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

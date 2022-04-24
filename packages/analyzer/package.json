@@ -1,0 +1,16 @@
+{
+  "name": "@injectable-ts/analyzer",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "private": true,
+  "scripts": {
+    "start": "ts-node-dev --respawn --project tsconfig.lib.json ./src/index.ts"
+  },
+  "dependencies": {
+    "ts-morph": "^14.0.0"
+  },
+  "devDependencies": {
+    "@injectable-ts/core": "^1.0.0-alpha.0",
+    "ts-node-dev": "^1.1.8"
+  }
+}
