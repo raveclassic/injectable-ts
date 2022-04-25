@@ -6,6 +6,15 @@ import { suppressConsoleError } from './utils'
 import { DependenciesProvider } from './dependencies-provider'
 
 describe('useInjectable', () => {
+  it('infers the type correctly', () => {
+    const value = injectable(() => 123)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const Component = () => {
+      // $ExpectType number
+      const v = useInjectable(value)
+      return v
+    }
+  })
   it('throws if called not within DependenciesProvider subtree', () => {
     const dispose = suppressConsoleError()
     const value = injectable(() => 123)
