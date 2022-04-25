@@ -1,9 +1,9 @@
 {
   "name": "@injectable-ts/fp-ts",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "type": "commonjs",
   "dependencies": {
-    "@injectable-ts/core": "^1.0.0-alpha.0"
+    "@injectable-ts/core": "^1.0.0-alpha.1"
   },
   "peerDependencies": {
     "fp-ts": "^2.11.9"
