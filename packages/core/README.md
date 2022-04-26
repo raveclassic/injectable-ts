@@ -270,7 +270,7 @@ const a = token('a')<string>()
 const b = injectable('b', a, (a) => `${a} b`)
 const c = injectable(b, (b) => `${b} c`)
 
-c({ a: 'a', b: 'override!' }) // returns "override c"
+c({ a: 'a', b: 'override!' }) // returns "override! c"
 ```
 
 ### Advanced overrides
@@ -292,7 +292,7 @@ const b = injectable('b', a, (a) => `${a} b`)
 const c = injectable(b, (b) => `${b} c`)
 const outer = provide(c)<'b'>()
 const inner = outer({}) // empty object here as there are no dependencies left
-inner({ b: 'override!' }) // no 'a' required, returns "override c"
+inner({ b: 'override!' }) // no 'a' required, returns "override! c"
 ```
 
 The example above might seem awkward, but it makes more sense when used with another `injectable` call:
@@ -302,7 +302,7 @@ const a = token('a')<string>()
 const b = injectable('b', a, (a) => `${a} b`)
 const c = injectable(b, (b) => `${b} c`)
 
-const d = injectable(provide(c)<'b'>(), (getC) => getC({ b: 'override' })) // same result as above
+const d = injectable(provide(c)<'b'>(), (getC) => getC({ b: 'override!' })) // same result as above
 ```
 
 Such technique may be really useful when we want to override some part of our dependency graph on-the-fly
