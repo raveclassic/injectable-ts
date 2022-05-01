@@ -29,6 +29,7 @@ So, the goals of this project are to:
 - 🤝 - strictly typed, your code can finally be trusted
 - λ - purely functional, your code is determinate, composable, without side-effects
 - 👻 - transparent, your code requires no additional infrastructure like containers and frameworks, it just works
+- ⚡️ - efficient, your code is cached and only runs when its dependencies change
 - ⚛️ - [React](https://reactjs.org/) integration, your code can be seamlessly integrated into any React application
 
 ## Structure
