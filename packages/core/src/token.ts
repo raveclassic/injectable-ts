@@ -32,3 +32,17 @@ export function token<Name extends PropertyKey>(name: Name) {
     }
   }
 }
+
+export function tokenOptional<Name extends PropertyKey>(name: Name) {
+  return <Type = never>(): Injectable<
+    {
+      readonly name: Name
+      readonly type: Type | undefined
+      readonly optional: true
+      readonly children: readonly []
+    },
+    Type | undefined
+  > => {
+    return (dependencies) => dependencies[name]
+  }
+}

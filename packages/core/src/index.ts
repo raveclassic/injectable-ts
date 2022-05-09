@@ -6,4 +6,9 @@ export {
   UnknownDependencyTree,
 } from './injectable'
 export { provide } from './provide'
-export { TokenAccessor, TOKEN_ACCESSOR_KEY, token } from './token'
+export {
+  TokenAccessor,
+  TOKEN_ACCESSOR_KEY,
+  token,
+  tokenOptional,
+} from './token'

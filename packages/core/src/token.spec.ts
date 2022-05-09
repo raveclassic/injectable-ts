@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { token, TOKEN_ACCESSOR_KEY, TokenAccessor } from './token'
-import { InjectableDependencies, InjectableValue } from './injectable'
+import {
+  token,
+  TOKEN_ACCESSOR_KEY,
+  TokenAccessor,
+  tokenOptional,
+} from './token'
+import {
+  injectable,
+  InjectableDependencies,
+  InjectableValue,
+} from './injectable'
 
 describe('token', () => {
   it('returns passed value as result', () => {
@@ -25,5 +34,15 @@ describe('token', () => {
     // $ExpectType "bar"
     const result = foo({ [TOKEN_ACCESSOR_KEY]: accessor, foo: 'bar' })
     expect(cb).toHaveBeenCalledWith('bar')
+  })
+  it('return optional token result', () => {
+    const foo = tokenOptional('foo')<'foo'>()
+
+    const bar = injectable(foo, (foo) =>
+      foo !== undefined ? `${foo}bar` : 'baz'
+    )
+
+    expect(bar({ foo: 'foo' })).toBe('foobar')
+    expect(bar({})).toBe('baz')
   })
 })
