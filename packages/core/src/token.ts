@@ -33,7 +33,7 @@ export function token<Name extends PropertyKey>(name: Name) {
   }
 }
 
-export function tokenOptional<Name extends PropertyKey>(name: Name) {
+export function optional<Name extends PropertyKey>(name: Name) {
   return <Type = never>(): Injectable<
     {
       readonly name: Name

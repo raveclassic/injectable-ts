@@ -1,10 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  token,
-  TOKEN_ACCESSOR_KEY,
-  TokenAccessor,
-  tokenOptional,
-} from './token'
+import { token, TOKEN_ACCESSOR_KEY, TokenAccessor, optional } from './token'
 import {
   injectable,
   InjectableDependencies,
@@ -36,10 +31,9 @@ describe('token', () => {
     expect(cb).toHaveBeenCalledWith('bar')
   })
   it('return optional token result', () => {
-    const foo = tokenOptional('foo')<'foo'>()
-
+    const foo = optional('foo')<'foo'>()
     const bar = injectable(foo, (foo) =>
-      foo !== undefined ? `${foo}bar` : 'baz'
+      foo !== undefined ? (`${foo}bar` as const) : 'baz'
     )
 
     expect(bar({ foo: 'foo' })).toBe('foobar')
