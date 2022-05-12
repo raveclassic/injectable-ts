@@ -14,7 +14,7 @@ export function token<Name extends PropertyKey>(name: Name) {
     {
       readonly name: Name
       readonly type: Type
-      readonly optional: false
+      readonly optional: undefined extends Type ? true : false
       readonly children: readonly [
         {
           readonly name: typeof TOKEN_ACCESSOR_KEY
@@ -28,7 +28,10 @@ export function token<Name extends PropertyKey>(name: Name) {
   > => {
     return (dependencies) => {
       const accessor = dependencies[TOKEN_ACCESSOR_KEY]
-      return accessor ? accessor(dependencies, name) : dependencies[name]
+      // undefined extends Type ? true : false above breaks dependencies type
+      // eslint-disable-next-line no-restricted-syntax
+      const cast: Record<Name, Type> = dependencies as never
+      return accessor ? accessor(cast, name) : cast[name]
     }
   }
 }
