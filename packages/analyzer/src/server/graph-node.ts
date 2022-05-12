@@ -7,7 +7,7 @@ interface TokenNode {
   readonly name: string
   readonly reference: TSM.Node
   readonly type: unknown
-  readonly parents: TSM.Node[]
+  readonly parents: readonly TSM.Node[]
 }
 
 interface InjectableNode {
@@ -35,6 +35,7 @@ export function buildGraphMap(
   injectableCore: InjectableCore
 ): GraphMap {
   const graphMap = new Map<TSM.Node, GraphNode>()
+  const identifierIdMap = new Map<TSM.Node, string>()
   fillTokenCalls(project, injectableCore, graphMap)
   fillInjectableCalls(project, injectableCore, graphMap)
   fillParents(graphMap)
@@ -48,12 +49,14 @@ const getReferenceNode = (node: TSM.Node): TSM.Node => {
 
 const fillTokenCall = (
   call: TSM.CallExpression,
-  out: Map<TSM.Node, GraphNode>
+  graphMap: Map<TSM.Node, GraphNode>,
+  identifierIdMap: Map<TSM.Node, string>
 ): void => {
   const injectableType = parseInjectableType(call)
   if (!injectableType) return
 
   const reference = getReferenceNode(call)
+  const referenceId = identifierIdMap.get(reference)
 
   const tokenNode: TokenNode = {
     kind: 'TokenNode',
@@ -62,13 +65,14 @@ const fillTokenCall = (
     reference,
     parents: [],
   }
-  out.set(reference, tokenNode)
+  graphMap.set(reference, tokenNode)
 }
 
 const fillTokenCalls = (
   project: Project,
   core: InjectableCore,
-  out: Map<TSM.Node, GraphNode>
+  outGraph: Map<TSM.Node, GraphNode>,
+  outIds: Map<TSM.Node, string>
 ): void => {
   for (const node of core.token.findReferencesAsNodes()) {
     const parent = node.getParent()
@@ -80,7 +84,7 @@ const fillTokenCalls = (
     if (!Node.isCallExpression(grandParent)) continue
     // is full "token('name')<type>()"
 
-    fillTokenCall(grandParent, out)
+    fillTokenCall(grandParent, outGraph)
   }
 }
 

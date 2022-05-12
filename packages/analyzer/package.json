@@ -4,13 +4,33 @@
   "type": "commonjs",
   "private": true,
   "scripts": {
-    "start": "ts-node-dev --respawn --project tsconfig.lib.json ./src/index.ts"
+    "build": "remix build",
+    "dev": "remix dev",
+    "start:server": "ts-node-dev --respawn --watch ./src/server --project ./src/server/tsconfig.json ./src/server/server.ts",
+    "start:remix": "remix watch",
+    "start": "concurrently \"npm run start:remix\" \"npm run start:server\""
   },
   "dependencies": {
+    "@remix-run/express": "1.4.1",
+    "@remix-run/react": "1.4.1",
+    "cytoscape": "^3.21.1",
+    "cytoscape-dagre": "^2.4.0",
+    "express": "^4.18.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "socket.io": "^4.5.0",
+    "socket.io-client": "^4.5.0",
     "ts-morph": "^14.0.0"
   },
   "devDependencies": {
     "@injectable-ts/core": "^1.0.0-alpha.0",
+    "@remix-run/dev": "1.4.1",
+    "@remix-run/serve": "1.4.1",
+    "@types/cytoscape": "^3.19.4",
+    "@types/cytoscape-dagre": "^2.3.0",
+    "@types/express": "^4.17.13",
+    "concurrently": "^7.1.0",
+    "remix": "1.4.1",
     "ts-node-dev": "^1.1.8"
   }
 }

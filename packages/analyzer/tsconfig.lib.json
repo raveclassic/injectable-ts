@@ -3,11 +3,14 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "declaration": true,
-    "types": ["node"],
-    "plugins": [{
-      "name": "@injectable-ts/analyzer-plugin"
-    }]
+    "types": []
   },
-  "include": ["**/*.ts"],
-  "exclude": ["**/*.spec.ts", "**/*.test.ts", "./demo"]
+  "references": [
+    {
+      "path": "./src/server/tsconfig.json"
+    },
+    {
+      "path": "./src/client/tsconfig.json"
+    }
+  ]
 }
