@@ -65,7 +65,7 @@ type MergeDependencies<
 > = {
   readonly name: Name
   readonly type: Type
-  readonly optional: Name extends never ? false : true
+  readonly optional: true
   readonly children: {
     readonly [Index in keyof Inputs]: InjectableDependencyTree<Inputs[Index]>
   }
