@@ -1,0 +1,14 @@
+{
+  "srcDir": "packages",
+  "exclude": [
+    "packages/core/src/index.ts",
+    "packages/**/*.spec.ts",
+    "packages/core/src/injectable.ts",
+    "packages/core/src/provide.ts",
+    "packages/core/src/utils.ts",
+    "packages/fp-ts/src/index.ts",
+    "packages/fp-ts/src/instance.ts",
+    "packages/react/src/index.ts",
+    "packages/react/src/utils.ts"
+  ]
+}
