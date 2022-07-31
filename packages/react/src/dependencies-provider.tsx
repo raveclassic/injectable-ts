@@ -9,6 +9,18 @@ const checkedAccessor: TokenAccessor = (dependencies, name) => {
   }
   throw new Error(`Missing dependency: ${JSON.stringify(name)}`)
 }
+
+/**
+ * DependeciesProvider
+ *
+ * @type Component
+ *
+ * @description
+ * Some description
+ *
+ * @example
+ * <DependeciesProvider />
+ */
 export const DependenciesProvider = memo(
   (props: ProviderProps<UnknownDependencies>) => {
     const previousDependencies = useContext(context)

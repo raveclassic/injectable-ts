@@ -7,6 +7,9 @@ import {
 import { useContext, useMemo } from 'react'
 import { context } from './context'
 
+/**
+ * useInjectable hook
+ */
 export function useInjectable<
   Input extends Injectable<UnknownDependencyTree, unknown>
 >(

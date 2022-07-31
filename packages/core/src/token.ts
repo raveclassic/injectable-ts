@@ -9,6 +9,15 @@ export interface TokenAccessor {
   ): Dependencies[Name]
 }
 
+/**
+ * Token is something
+ *
+ * @param {Name} name - name of dependency
+ *
+ * @example
+ * const a = token('a')<string>()
+ *
+ */
 export function token<Name extends PropertyKey>(name: Name) {
   return <Type = never>(): Injectable<
     {
