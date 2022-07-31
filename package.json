@@ -19,8 +19,7 @@
     "version": "npm i && git add package-lock.json",
     "postversion": "git push",
     "predeploy": "npm run build",
-    "deploy": "nx run-many --target=deploy --all",
-    "docs": "docs-ts"
+    "deploy": "nx run-many --target=deploy --all"
   },
   "dependencies": {
     "tslib": "^2.0.0"
@@ -39,7 +38,6 @@
     "@types/node": "~16.11.26",
     "@typescript-eslint/eslint-plugin": "~5.18.0",
     "@typescript-eslint/parser": "~5.18.0",
-    "docs-ts": "^0.6.10",
     "eslint": "~8.13.0",
     "eslint-config-prettier": "~8.5.0",
     "eslint-plugin-expect-type": "~0.1.0",
