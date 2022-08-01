@@ -19,6 +19,22 @@ type OmitDependencies<Tree, Keys> = Tree extends UnknownDependencyTree
     : Step<Tree, Keys>
   : never
 
+/**
+ * Takes a list of keys of available dependencies and "splits" the computation into 2 nested computations - inner and outer
+ * 1. the "outer" computation that takes all dependencies but passed to provide
+ * 2. the "inner" computation that takes only dependencies passed to provide
+ *
+ * @param {...unknown} dependencies
+ * @returns {Injectable}
+ *
+ * @example
+ * const a = token('a')<string>()
+ * const b = injectable('b', a, (a) => `${a} b`)
+ * const c = injectable(b, (b) => `${b} c`)
+ * const outer = provide(c)<'b'>()
+ * const inner = outer({}) // empty object here as there are no dependencies left
+ * inner({ b: 'override!' }) // no 'a' required, returns "override! c"
+ */
 export function provide<Dependencies extends UnknownDependencyTree, Value>(
   input: Injectable<Dependencies, Value>
 ) {

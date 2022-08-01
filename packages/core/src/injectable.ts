@@ -103,6 +103,20 @@ export function injectable<
   },
   Value
 >
+
+/**
+ * Create IoC with DI
+ *
+ * @param {Name} name
+ * @param {...unknown} dependencies
+ * @returns {Injectable}
+ *
+ * @example
+ * const a = token('a')<string>()
+ * const b = injectable('b', a, (a) => `${a} b`)
+ * const c = injectable(b, (b) => `${b} c`)
+ * c({ a: 'a', b: 'override!' }) // returns "override! c"
+ */
 export function injectable(
   ...args: readonly unknown[]
 ): Injectable<UnknownDependencyTree, unknown> {
