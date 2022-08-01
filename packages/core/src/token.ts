@@ -10,9 +10,10 @@ export interface TokenAccessor {
 }
 
 /**
- * Token is something
+ * Set dependency key
  *
- * @param {Name} name - name of dependency
+ * @param {Name} name -
+ * @returns {Injectable}
  *
  * @example
  * const a = token('a')<string>()
