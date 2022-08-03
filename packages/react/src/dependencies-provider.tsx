@@ -9,6 +9,28 @@ const checkedAccessor: TokenAccessor = (dependencies, name) => {
   }
   throw new Error(`Missing dependency: ${JSON.stringify(name)}`)
 }
+
+/**
+ * DependeciesProvider
+ *
+ * @type Component
+ * @description Provide dependency with React context
+ *
+ *
+ * @example
+ * const value = token('foo')<string>()
+ * const Component = () => {
+ *   const depFoo useInjectable(value)
+ *   return <div>{depFoo}</div>
+ * }
+ * const App = () => {
+ *   return (
+ *    <DependenciesProvider value={{ foo: 'bar'}}>
+ *      <Component />
+ *    </DependenciesProvider>
+ *   )
+ * }
+ */
 export const DependenciesProvider = memo(
   (props: ProviderProps<UnknownDependencies>) => {
     const previousDependencies = useContext(context)

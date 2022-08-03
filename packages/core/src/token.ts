@@ -9,6 +9,16 @@ export interface TokenAccessor {
   ): Dependencies[Name]
 }
 
+/**
+ * Create injectable with assign dependency to named key
+ *
+ * @param {Name} name
+ * @returns {Injectable}
+ *
+ * @example
+ * const a = token('a')<string>()
+ * const b = injectable(a, (a) => `${a} b`)
+ */
 export function token<Name extends PropertyKey>(name: Name) {
   return <Type = never>(): Injectable<
     {

@@ -2,6 +2,9 @@
 
 This package contains the building blocks for IoC/DI.
 
+- [API](./API.md)
+- [Example](./example)
+
 ## Overview
 
 The main idea of the library stands on primitive building blocks - computations.

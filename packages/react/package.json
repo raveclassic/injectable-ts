@@ -2,6 +2,9 @@
   "name": "@injectable-ts/react",
   "version": "1.0.0-alpha.2",
   "type": "commonjs",
+  "scripts": {
+    "docs": "jsdoc2md --files ./src/**/*.tsx --configure ../../jsdoc2md.json > ./API.md"
+  },
   "dependencies": {
     "@injectable-ts/core": "^1.0.0-alpha.2"
   },

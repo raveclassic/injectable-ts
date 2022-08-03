@@ -2,6 +2,9 @@
   "name": "@injectable-ts/core",
   "version": "1.0.0-alpha.2",
   "type": "commonjs",
+  "scripts": {
+    "docs": "jsdoc2md --files ./src/**/*.ts --configure ../../jsdoc2md.json > ./API.md"
+  },
   "dependencies": {
     "@frp-ts/utils": "^1.0.0-alpha.15"
   }
