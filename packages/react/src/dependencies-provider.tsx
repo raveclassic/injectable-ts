@@ -14,12 +14,22 @@ const checkedAccessor: TokenAccessor = (dependencies, name) => {
  * DependeciesProvider
  *
  * @type Component
+ * @description Provide dependency with React context
  *
- * @description
- * Some description
  *
  * @example
- * <DependeciesProvider />
+ * const value = token('foo')<string>()
+ * const Component = () => {
+ *   const depFoo useInjectable(value)
+ *   return <div>{depFoo}</div>
+ * }
+ * const App = () => {
+ *   return (
+ *    <DependenciesProvider value={{ foo: 'bar'}}>
+ *      <Component />
+ *    </DependenciesProvider>
+ *   )
+ * }
  */
 export const DependenciesProvider = memo(
   (props: ProviderProps<UnknownDependencies>) => {

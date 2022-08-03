@@ -8,7 +8,18 @@ import { useContext, useMemo } from 'react'
 import { context } from './context'
 
 /**
- * useInjectable hook
+ * React hook for retrieve injectable value inside IoC context
+ *
+ * @param {...unknown} dependencies
+ * @param {Partial<InjectableDependencies<Input>>} overrides
+ * @returns {unknown} dependency
+ *
+ * @example
+ * const value = token('foo')<string>()
+ * const Component = () => {
+ *   const depFoo useInjectable(value)
+ *   return <div>{depFoo}</div>
+ * }
  */
 export function useInjectable<
   Input extends Injectable<UnknownDependencyTree, unknown>
