@@ -36,7 +36,9 @@ interface ProvideFn {
     }) => Value
   >
 }
-export const provide: ProvideFn =
-  (input) => () => (outerDependencies) => (innerDependencies) =>
-    // eslint-disable-next-line no-restricted-syntax
-    input({ ...outerDependencies, ...innerDependencies } as never)
+export const provide: ProvideFn = (input) => () =>
+  // eslint-disable-next-line no-restricted-syntax
+  ((outerDependencies: Record<string, unknown>) =>
+    (innerDependencies: Record<string, unknown>) =>
+      // eslint-disable-next-line no-restricted-syntax
+      input({ ...outerDependencies, ...innerDependencies } as never)) as never

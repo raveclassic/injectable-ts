@@ -1,4 +1,8 @@
-import { Injectable } from './injectable'
+import {
+  Injectable,
+  UnknownDependencyTree,
+  UnknownInjectable,
+} from './injectable'
 
 export const TOKEN_ACCESSOR_KEY = '@injectable-ts/core//TOKEN_ACCESSOR'
 
@@ -9,10 +13,17 @@ export interface TokenAccessor {
   ): Dependencies[Name]
 }
 
-export function token<Name extends PropertyKey>(name: Name) {
-  return <Type = never>(): Injectable<
+// must be a type alias, otherwise it doesn't type check
+export type TokenInjectable<
+  Tree extends UnknownDependencyTree,
+  Value,
+  Key
+> = Injectable<Tree, Value> & { readonly key: Key }
+
+export function token<Key extends PropertyKey>(key: Key) {
+  return <Type = never>(): TokenInjectable<
     {
-      readonly name: Name
+      readonly name: Key
       readonly type: Type
       readonly optional: false
       readonly children: readonly [
@@ -24,11 +35,19 @@ export function token<Name extends PropertyKey>(name: Name) {
         }
       ]
     },
-    Type
+    Type,
+    Key
   > => {
-    return (dependencies) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any,no-restricted-syntax
+    const result = ((dependencies: any) => {
       const accessor = dependencies[TOKEN_ACCESSOR_KEY]
-      return accessor ? accessor(dependencies, name) : dependencies[name]
-    }
+      return accessor !== undefined
+        ? accessor(dependencies, key)
+        : dependencies[key]
+    }) as UnknownInjectable
+    // eslint-disable-next-line no-restricted-syntax,@typescript-eslint/no-explicit-any
+    ;(result as any).key = key
+    // eslint-disable-next-line no-restricted-syntax
+    return result as never
   }
 }

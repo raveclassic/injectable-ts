@@ -1,9 +1,15 @@
 export {
-  Injectable,
-  InjectableValue,
-  InjectableDependencies,
+  type Injectable,
+  type InjectableValue,
+  type InjectableDependencies,
   injectable,
-  UnknownDependencyTree,
+  type UnknownInjectable,
+  type UnknownDependencyTree,
 } from './injectable'
 export { provide } from './provide'
-export { TokenAccessor, TOKEN_ACCESSOR_KEY, token } from './token'
+export {
+  type TokenAccessor,
+  type TokenInjectable,
+  TOKEN_ACCESSOR_KEY,
+  token,
+} from './token'

@@ -33,36 +33,33 @@ export type Flatten<Tree> = Tree extends UnknownDependencyTree
   : never
 
 export interface Injectable<Tree extends UnknownDependencyTree, Value> {
-  (tree: Flatten<NoInfer<Tree>>): Value
+  readonly _value: Value
+  readonly _tree: NoInfer<Tree>
+  readonly _flat: Flatten<NoInfer<Tree>>
+  (tree: this['_flat']): Value
 }
 
-export type InjectableValue<Target> = Target extends Injectable<
-  UnknownDependencyTree,
-  infer Value
->
-  ? Value
-  : never
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface UnknownInjectable extends Injectable<any, any> {}
 
-export type InjectableDependencyTree<Target> = Target extends Injectable<
-  infer Tree,
-  unknown
->
-  ? Tree
-  : never
+export type InjectableValue<Target extends UnknownInjectable> = Target['_value']
 
-export type InjectableDependencies<Target> = Merge<
+export type InjectableDependencyTree<Target extends UnknownInjectable> =
+  Target['_tree']
+
+export type InjectableDependencies<Target extends UnknownInjectable> = Merge<
   Flatten<InjectableDependencyTree<Target>>
 >
 
-type MapInjectablesToValues<Targets> = {
+type MapInjectablesToValues<Targets extends readonly UnknownInjectable[]> = {
   readonly [Index in keyof Targets]: InjectableValue<Targets[Index]>
 }
 
-type MergeDependencies<
+interface MergeDependencies<
   Inputs extends readonly Injectable<never, unknown>[],
   Name extends PropertyKey | never,
   Type
-> = {
+> {
   readonly name: Name
   readonly type: Type
   readonly optional: Name extends never ? false : true
@@ -73,7 +70,7 @@ type MergeDependencies<
 
 export function injectable<
   Name extends PropertyKey,
-  Inputs extends readonly Injectable<UnknownDependencyTree, unknown>[],
+  Inputs extends readonly UnknownInjectable[],
   Value
 >(
   name: Name,
@@ -88,10 +85,7 @@ export function injectable<
   },
   Value
 >
-export function injectable<
-  Inputs extends readonly Injectable<UnknownDependencyTree, unknown>[],
-  Value
->(
+export function injectable<Inputs extends readonly UnknownInjectable[], Value>(
   ...args: [...Inputs, (...values: MapInjectablesToValues<Inputs>) => Value]
 ): Injectable<
   {
@@ -103,11 +97,9 @@ export function injectable<
   },
   Value
 >
-export function injectable(
-  ...args: readonly unknown[]
-): Injectable<UnknownDependencyTree, unknown> {
+export function injectable(...args: readonly unknown[]): UnknownInjectable {
   const name = isPropertyKey(args[0]) ? args[0] : undefined
-  const injectables: readonly Injectable<UnknownDependencyTree, unknown>[] =
+  const injectables: readonly UnknownInjectable[] =
     // eslint-disable-next-line no-restricted-syntax
     args.slice(name !== undefined ? 1 : 0, args.length - 1) as never
   // eslint-disable-next-line no-restricted-syntax
@@ -116,7 +108,8 @@ export function injectable(
   ] as never
 
   const memoizedProject = memoMany(project)
-  return (dependencies: Record<PropertyKey, unknown>) => {
+  // eslint-disable-next-line no-restricted-syntax
+  return ((dependencies: Record<PropertyKey, unknown>): unknown => {
     if (name !== undefined) {
       const override = dependencies[name]
       if (override !== undefined) {
@@ -125,7 +118,7 @@ export function injectable(
     }
     const values = injectables.map((injectable) => injectable(dependencies))
     return memoizedProject(...values)
-  }
+  }) as UnknownInjectable
 }
 
 const isPropertyKey = (input: unknown): input is PropertyKey =>
