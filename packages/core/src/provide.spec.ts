@@ -4,8 +4,9 @@ import {
   InjectableDependencies,
   InjectableValue,
 } from './injectable'
-import { token, TOKEN_ACCESSOR_KEY } from './token'
+import { token, TOKEN_ACCESSOR_KEY, TokenAccessor } from './token'
 import { provide } from './provide'
+import { Eq } from './utils'
 
 describe('provide', () => {
   it('removes passed keys from source injectable with a name', () => {
@@ -16,22 +17,15 @@ describe('provide', () => {
       () => 'foo'
     )
     const outer = provide(foo)<'a'>()
-    type Dependencies = InjectableDependencies<typeof outer>
-    // FIXME sowehow "nx lint core" runs eslint differently than WebStorm/VSCode
-    // which results in the check below to give false-negative result
-    // because of the order of keys.
-    // Below we expect "foo" | "b" and that's what TS infers
-    // but in "nx lint core" the type is "b" | "foo" which gives the error.
-    // I don't see any good solution for now
-    // so let's wait until this is resolved in "nx".
-    // // $ExpectType "foo" | "b"
-    // type t1 = Exclude<keyof Dependencies, typeof TOKEN_ACCESSOR_KEY>
-    // $ExpectType string | undefined
-    type t2 = Dependencies['foo']
-    // $ExpectType number
-    type t3 = Dependencies['b']
-    // $ExpectType TokenAccessor | undefined
-    type t4 = Dependencies[typeof TOKEN_ACCESSOR_KEY]
+    // $ExpectType true
+    type t1 = Eq<
+      {
+        foo?: string
+        b: number
+        [TOKEN_ACCESSOR_KEY]?: TokenAccessor
+      },
+      InjectableDependencies<typeof outer>
+    >
   })
   it('removes passed keys from source injectable without a name', () => {
     const foo = injectable(
@@ -41,13 +35,14 @@ describe('provide', () => {
     )
 
     const outer = provide(foo)<'a'>()
-    type Dependencies = InjectableDependencies<typeof outer>
-    // $ExpectType "b"
-    type t1 = Exclude<keyof Dependencies, typeof TOKEN_ACCESSOR_KEY>
-    // $ExpectType number
-    type t3 = Dependencies['b']
-    // $ExpectType TokenAccessor | undefined
-    type t4 = Dependencies[typeof TOKEN_ACCESSOR_KEY]
+    // $ExpectType true
+    type t1 = Eq<
+      {
+        b: number
+        [TOKEN_ACCESSOR_KEY]?: TokenAccessor
+      },
+      InjectableDependencies<typeof outer>
+    >
   })
   it('removes all keys but passed keys from the result factory for source injectable with a name', () => {
     const foo = injectable(
@@ -59,10 +54,8 @@ describe('provide', () => {
     const outer = provide(foo)<'a'>()
     const inner = outer({ b: 123 })
     type InnerDependencies = Parameters<typeof inner>[0]
-    // $ExpectType "a"
-    type t1 = keyof InnerDependencies
-    // $ExpectType string
-    type t2 = InnerDependencies['a']
+    // $ExpectType true
+    type t1 = Eq<{ a: string }, InnerDependencies>
   })
   it('removes all keys but passed keys from the result factory for source injectable without a name', () => {
     const foo = injectable(
@@ -73,10 +66,8 @@ describe('provide', () => {
     const outer = provide(foo)<'a'>()
     const inner = outer({ b: 123 })
     type InnerDependencies = Parameters<typeof inner>[0]
-    // $ExpectType "a"
-    type t1 = keyof InnerDependencies
-    // $ExpectType string
-    type t2 = InnerDependencies['a']
+    // $ExpectType true
+    type t1 = Eq<{ a: string }, InnerDependencies>
   })
   it('merges all keys when both outer injectable and inner factory are executed for source injectable with a name', () => {
     const foo = injectable(
@@ -113,56 +104,111 @@ describe('provide', () => {
     //                \
     //                 d (token)
     const d = token('d')<'d'>()
-    const c = injectable('c', d, (d) => `c->${d}` as const)
-    const b = injectable('b', c, (c) => `b->${c}` as const)
+    const c = injectable('c', d, (d) => `c->${d}`)
+    const b = injectable('b', c, (c) => `b->${c}`)
     const e = token('e')<'e'>()
-    const a = injectable('a', b, e, (b, e) => `a->${b}, a->${e}` as const)
+    const a = injectable('a', b, e, (b, e) => `a->${b}, a->${e}`)
     it('splits by "d"', () => {
       const withD = provide(a)<'d'>()
-      // $ExpectType "a" | "b" | "c" | "e"
-      type t1 = Exclude<
-        keyof InjectableDependencies<typeof withD>,
-        typeof TOKEN_ACCESSOR_KEY
+      // $ExpectType true
+      type t1 = Eq<
+        {
+          a?: string
+          b?: string
+          c?: string
+          e: 'e'
+          [TOKEN_ACCESSOR_KEY]?: TokenAccessor
+        },
+        InjectableDependencies<typeof withD>
       >
-      // $ExpectType "d"
-      type t2 = keyof Parameters<InjectableValue<typeof withD>>[0]
+      // $ExpectType true
+      type t2 = Eq<
+        {
+          d: 'd'
+        },
+        Parameters<InjectableValue<typeof withD>>[0]
+      >
     })
     it('splits by "c"', () => {
-      const withD = provide(a)<'c'>()
-      // $ExpectType "a" | "b" | "e"
-      type t1 = Exclude<
-        keyof InjectableDependencies<typeof withD>,
-        typeof TOKEN_ACCESSOR_KEY
+      const withC = provide(a)<'c'>()
+      // $ExpectType true
+      type t1 = Eq<
+        {
+          a?: string
+          b?: string
+          e: 'e'
+          [TOKEN_ACCESSOR_KEY]?: TokenAccessor
+        },
+        InjectableDependencies<typeof withC>
       >
-      // $ExpectType "c"
-      type t2 = keyof Parameters<InjectableValue<typeof withD>>[0]
+      // $ExpectType true
+      type t2 = Eq<
+        {
+          c?: string
+        },
+        Parameters<InjectableValue<typeof withC>>[0]
+      >
     })
     it('splits by "b"', () => {
-      const withD = provide(a)<'b'>()
-      // $ExpectType "a" | "e"
-      type t1 = Exclude<
-        keyof InjectableDependencies<typeof withD>,
-        typeof TOKEN_ACCESSOR_KEY
+      const withB = provide(a)<'b'>()
+      // $ExpectType true
+      type t1 = Eq<
+        {
+          a?: string
+          e: 'e'
+          [TOKEN_ACCESSOR_KEY]?: TokenAccessor
+        },
+        InjectableDependencies<typeof withB>
       >
-      // $ExpectType "b"
-      type t2 = keyof Parameters<InjectableValue<typeof withD>>[0]
+      // $ExpectType true
+      type t2 = Eq<
+        {
+          b?: string
+        },
+        Parameters<InjectableValue<typeof withB>>[0]
+      >
     })
     it('splits by "e"', () => {
-      const withD = provide(a)<'e'>()
-      // $ExpectType "a" | "b" | "c" | "d"
-      type t1 = Exclude<
-        keyof InjectableDependencies<typeof withD>,
-        typeof TOKEN_ACCESSOR_KEY
+      const withE = provide(a)<'e'>()
+      // $ExpectType true
+      type t1 = Eq<
+        {
+          a?: string
+          b?: string
+          c?: string
+          d: 'd'
+          [TOKEN_ACCESSOR_KEY]?: TokenAccessor
+        },
+        InjectableDependencies<typeof withE>
       >
-      // $ExpectType "e"
-      type t2 = keyof Parameters<InjectableValue<typeof withD>>[0]
+      // $ExpectType true
+      type t2 = Eq<
+        {
+          e: 'e'
+        },
+        Parameters<InjectableValue<typeof withE>>[0]
+      >
     })
     it('splits by "e" and "d" and removes TokenAccessor', () => {
-      const withD = provide(a)<'d' | 'e'>()
-      // $ExpectType "a" | "b" | "c"
-      type t1 = keyof InjectableDependencies<typeof withD>
-      // $ExpectType "d" | "e"
-      type t2 = keyof Parameters<InjectableValue<typeof withD>>[0]
+      const withED = provide(a)<'d' | 'e'>()
+      // $ExpectType true
+      type t1 = Eq<
+        {
+          a?: string
+          b?: string
+          c?: string
+        },
+        InjectableDependencies<typeof withED>
+      >
+      // $ExpectType true
+      type t2 = Eq<
+        {
+          d: 'd'
+          e: 'e'
+          [TOKEN_ACCESSOR_KEY]?: TokenAccessor
+        },
+        Parameters<InjectableValue<typeof withED>>[0]
+      >
     })
   })
   describe('stress test without names', () => {
@@ -181,30 +227,52 @@ describe('provide', () => {
     const a = injectable(b, e, (b, e) => `a->${b}, a->${e}` as const)
     it('splits by "d"', () => {
       const withD = provide(a)<'d'>()
-      // $ExpectType "e"
-      type t1 = Exclude<
-        keyof InjectableDependencies<typeof withD>,
-        typeof TOKEN_ACCESSOR_KEY
+      // $ExpectType true
+      type t1 = Eq<
+        {
+          e: 'e'
+          [TOKEN_ACCESSOR_KEY]?: TokenAccessor
+        },
+        InjectableDependencies<typeof withD>
       >
-      // $ExpectType "d"
-      type t2 = keyof Parameters<InjectableValue<typeof withD>>[0]
+      // $ExpectType true
+      type t2 = Eq<
+        {
+          d: 'd'
+        },
+        Parameters<InjectableValue<typeof withD>>[0]
+      >
     })
     it('splits by "e"', () => {
-      const withD = provide(a)<'e'>()
-      // $ExpectType "d"
-      type t1 = Exclude<
-        keyof InjectableDependencies<typeof withD>,
-        typeof TOKEN_ACCESSOR_KEY
+      const withE = provide(a)<'e'>()
+      // $ExpectType true
+      type t1 = Eq<
+        {
+          d: 'd'
+          [TOKEN_ACCESSOR_KEY]?: TokenAccessor
+        },
+        InjectableDependencies<typeof withE>
       >
-      // $ExpectType "e"
-      type t2 = keyof Parameters<InjectableValue<typeof withD>>[0]
+      // $ExpectType true
+      type t2 = Eq<
+        {
+          e: 'e'
+        },
+        Parameters<InjectableValue<typeof withE>>[0]
+      >
     })
     it('splits by "e" and "d" and removes TokenAccessor', () => {
       const withD = provide(a)<'d' | 'e'>()
       // $ExpectType never
       type t1 = keyof InjectableDependencies<typeof withD>
-      // $ExpectType "d" | "e"
-      type t2 = keyof Parameters<InjectableValue<typeof withD>>[0]
+      // $ExpectType true
+      type t2 = Eq<
+        {
+          d: 'd'
+          e: 'e'
+        },
+        Parameters<InjectableValue<typeof withD>>[0]
+      >
     })
   })
 })
