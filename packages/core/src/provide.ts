@@ -19,24 +19,24 @@ type OmitDependencies<Tree, Keys> = Tree extends UnknownDependencyTree
     : Step<Tree, Keys>
   : never
 
-export function provide<Dependencies extends UnknownDependencyTree, Value>(
-  input: Injectable<Dependencies, Value>
-) {
-  return <Keys extends keyof Flatten<Dependencies>>(): Injectable<
-      {
-        readonly [Key in keyof OmitDependencies<
-          Dependencies,
-          Keys
-        >]: OmitDependencies<Dependencies, Keys>[Key]
-      },
-      (innerDependencies: {
-        readonly [Key in keyof Flatten<Dependencies> as Key extends Keys
-          ? Key
-          : never]: Flatten<Dependencies>[Key]
-      }) => Value
-    > =>
-    (outerDependencies) =>
-    (innerDependencies) =>
-      // eslint-disable-next-line no-restricted-syntax
-      input({ ...outerDependencies, ...innerDependencies } as never)
+interface ProvideFn {
+  <Dependencies extends UnknownDependencyTree, Value>(
+    input: Injectable<Dependencies, Value>
+  ): <Keys extends keyof Flatten<Dependencies>>() => Injectable<
+    {
+      readonly [Key in keyof OmitDependencies<
+        Dependencies,
+        Keys
+      >]: OmitDependencies<Dependencies, Keys>[Key]
+    },
+    (innerDependencies: {
+      readonly [Key in keyof Flatten<Dependencies> as Key extends Keys
+        ? Key
+        : never]: Flatten<Dependencies>[Key]
+    }) => Value
+  >
 }
+export const provide: ProvideFn =
+  (input) => () => (outerDependencies) => (innerDependencies) =>
+    // eslint-disable-next-line no-restricted-syntax
+    input({ ...outerDependencies, ...innerDependencies } as never)
