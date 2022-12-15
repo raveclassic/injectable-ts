@@ -1,5 +1,6 @@
 {
-  "root": "packages/core",
+  "name": "core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/core/src",
   "targets": {
     "build": {
@@ -21,9 +22,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/core"],
+      "outputs": ["{workspaceRoot}/coverage/packages/core"],
       "options": {
-        "jestConfig": "packages/core/jest.config.js",
+        "jestConfig": "packages/core/jest.config.ts",
         "passWithNoTests": false,
         "codeCoverage": true
       }

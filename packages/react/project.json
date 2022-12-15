@@ -1,5 +1,6 @@
 {
-  "root": "packages/react",
+  "name": "react",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/react/src",
   "targets": {
     "build": {
@@ -21,9 +22,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/react"],
+      "outputs": ["{workspaceRoot}/coverage/packages/react"],
       "options": {
-        "jestConfig": "packages/react/jest.config.js",
+        "jestConfig": "packages/react/jest.config.ts",
         "passWithNoTests": false,
         "codeCoverage": true
       }

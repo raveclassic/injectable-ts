@@ -1,4 +1,5 @@
-module.exports = {
+/* eslint-disable */
+export default {
   displayName: 'core',
   preset: '../../jest.preset.js',
   globals: {
@@ -11,4 +12,4 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/core',
-};
+}
