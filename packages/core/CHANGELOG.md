@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.3](https://github.com/raveclassic/injectable-ts/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2022-12-15)
+
+
+### Features
+
+* **core:** lightweight keys ([#10](https://github.com/raveclassic/injectable-ts/issues/10)) ([ca7e708](https://github.com/raveclassic/injectable-ts/commit/ca7e70802e9d5f0e10d2d13278b925bda68b07ce))
+
+
+
+
+
 # [1.0.0-alpha.2](https://github.com/raveclassic/injectable-ts/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2022-05-16)
 
 **Note:** Version bump only for package @injectable-ts/core
