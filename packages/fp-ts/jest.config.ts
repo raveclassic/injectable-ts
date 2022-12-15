@@ -1,4 +1,3 @@
-/* eslint-disable */
 export default {
   displayName: 'fp-ts',
   preset: '../../jest.preset.js',
