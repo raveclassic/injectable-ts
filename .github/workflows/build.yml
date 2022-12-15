@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '16.16.0'
           cache: npm
 
 #      - name: Cache npm modules
@@ -61,7 +61,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '16.16.0'
           cache: npm
 
 #      - name: Cache npm modules
