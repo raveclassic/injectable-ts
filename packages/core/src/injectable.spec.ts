@@ -90,4 +90,10 @@ describe('injectable', () => {
     expect(result).toBe('override')
     expect(project).not.toHaveBeenCalled()
   })
+  it('stores key', () => {
+    const foo = injectable('foo', () => 123)
+    // $ExpectType "foo"
+    foo.key
+    expect(foo.key).toEqual('foo')
+  })
 })

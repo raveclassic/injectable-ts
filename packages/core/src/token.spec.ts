@@ -26,4 +26,10 @@ describe('token', () => {
     const result = foo({ [TOKEN_ACCESSOR_KEY]: accessor, foo: 'bar' })
     expect(cb).toHaveBeenCalledWith('bar')
   })
+  it('stores key', () => {
+    const foo = token('foo')<string>()
+    // $ExpectType "foo"
+    foo.key
+    expect(foo.key).toEqual('foo')
+  })
 })

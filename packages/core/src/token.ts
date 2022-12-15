@@ -1,4 +1,4 @@
-import { Injectable } from './injectable'
+import { InjectableWithName } from './injectable'
 
 export const TOKEN_ACCESSOR_KEY = '@injectable-ts/core//TOKEN_ACCESSOR'
 
@@ -10,7 +10,7 @@ export interface TokenAccessor {
 }
 
 export function token<Name extends PropertyKey>(name: Name) {
-  return <Type = never>(): Injectable<
+  return <Type = never>(): InjectableWithName<
     {
       readonly name: Name
       readonly type: Type
@@ -26,9 +26,15 @@ export function token<Name extends PropertyKey>(name: Name) {
     },
     Type
   > => {
-    return (dependencies) => {
+    const f = (
+      dependencies: {
+        readonly [TOKEN_ACCESSOR_KEY]?: TokenAccessor
+      } & Record<Name, Type>
+    ): Type => {
       const accessor = dependencies[TOKEN_ACCESSOR_KEY]
       return accessor ? accessor(dependencies, name) : dependencies[name]
     }
+    f.key = name
+    return f
   }
 }

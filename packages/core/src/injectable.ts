@@ -32,9 +32,21 @@ export type Flatten<Tree> = Tree extends UnknownDependencyTree
       >
   : never
 
-export interface Injectable<Tree extends UnknownDependencyTree, Value> {
+export interface InjectableWithoutName<
+  Tree extends UnknownDependencyTree,
+  Value
+> {
   (tree: Flatten<NoInfer<Tree>>): Value
 }
+
+export interface InjectableWithName<Tree extends UnknownDependencyTree, Value> {
+  (tree: Flatten<NoInfer<Tree>>): Value
+  readonly key: Tree['name']
+}
+
+export type Injectable<Tree extends UnknownDependencyTree, Value> =
+  | InjectableWithoutName<Tree, Value>
+  | InjectableWithName<Tree, Value>
 
 export type InjectableValue<Target> = Target extends Injectable<
   UnknownDependencyTree,
@@ -59,7 +71,7 @@ type MapInjectablesToValues<Targets> = {
 }
 
 type MergeDependencies<
-  Inputs extends readonly Injectable<never, unknown>[],
+  Inputs extends readonly Injectable<UnknownDependencyTree, unknown>[],
   Name extends PropertyKey | never,
   Type
 > = {
@@ -73,12 +85,15 @@ type MergeDependencies<
 
 export function injectable<
   Name extends PropertyKey,
-  Inputs extends readonly Injectable<UnknownDependencyTree, unknown>[],
+  Inputs extends readonly (
+    | Injectable<UnknownDependencyTree, unknown>
+    | InjectableWithName<UnknownDependencyTree, unknown>
+  )[],
   Value
 >(
   name: Name,
   ...args: [...Inputs, (...values: MapInjectablesToValues<Inputs>) => Value]
-): Injectable<
+): InjectableWithName<
   {
     readonly [Key in keyof MergeDependencies<
       Inputs,
@@ -93,7 +108,7 @@ export function injectable<
   Value
 >(
   ...args: [...Inputs, (...values: MapInjectablesToValues<Inputs>) => Value]
-): Injectable<
+): InjectableWithoutName<
   {
     readonly [Key in keyof MergeDependencies<
       Inputs,
@@ -116,7 +131,7 @@ export function injectable(
   ] as never
 
   const memoizedProject = memoMany(project)
-  return (dependencies: Record<PropertyKey, unknown>) => {
+  const f = (dependencies: Record<PropertyKey, unknown>): unknown => {
     if (name !== undefined) {
       const override = dependencies[name]
       if (override !== undefined) {
@@ -126,6 +141,9 @@ export function injectable(
     const values = injectables.map((injectable) => injectable(dependencies))
     return memoizedProject(...values)
   }
+  f.key = name
+
+  return f
 }
 
 const isPropertyKey = (input: unknown): input is PropertyKey =>
