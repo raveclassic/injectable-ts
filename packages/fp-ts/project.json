@@ -1,5 +1,6 @@
 {
-  "root": "packages/fp-ts",
+  "name": "fp-ts",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/fp-ts/src",
   "targets": {
     "build": {
@@ -21,9 +22,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/packages/fp-ts"],
+      "outputs": ["{workspaceRoot}/coverage/packages/fp-ts"],
       "options": {
-        "jestConfig": "packages/fp-ts/jest.config.js",
+        "jestConfig": "packages/fp-ts/jest.config.ts",
         "passWithNoTests": true
       }
     },
