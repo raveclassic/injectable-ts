@@ -16,6 +16,12 @@
         "production": {}
       }
     },
+    "dev": {
+      "command": "ts-node-dev --respawn --project tsconfig.app.json ./src/server/server.ts",
+      "options": {
+        "cwd": "packages/analyzer"
+      }
+    },
     "serve": {
       "executor": "@nrwl/vite:dev-server",
       "defaultConfiguration": "development",
