@@ -1,6 +1,7 @@
 {
   "version": 2,
   "projects": {
+    "analyzer": "packages/analyzer",
     "core": "packages/core",
     "fp-ts": "packages/fp-ts",
     "react": "packages/react"

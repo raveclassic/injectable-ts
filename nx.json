@@ -11,6 +11,22 @@
     "@nrwl/js:library": {
       "buildable": true,
       "setParserOptionsProject": true
+    },
+    "@nrwl/react": {
+      "application": {
+        "style": "styled-components",
+        "linter": "eslint",
+        "bundler": "vite",
+        "babel": true
+      },
+      "component": {
+        "style": "styled-components"
+      },
+      "library": {
+        "style": "styled-components",
+        "linter": "eslint",
+        "unitTestRunner": "vitest"
+      }
     }
   },
   "tasksRunnerOptions": {
@@ -49,5 +65,6 @@
     "@nrwl/js": {
       "analyzeSourceFiles": true
     }
-  }
+  },
+  "defaultProject": "analyzer"
 }
