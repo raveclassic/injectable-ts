@@ -1,17 +1,15 @@
-interface BaseGraphNode {
-  readonly id: string
+interface TokenGraphNode {
+  readonly kind: 'token'
   readonly type: string
   readonly file: string
-}
-
-interface TokenGraphNode extends BaseGraphNode {
-  readonly kind: 'token'
   readonly name: string
 }
 
-interface InjectableGraphNode extends BaseGraphNode {
+interface InjectableGraphNode {
   readonly kind: 'injectable'
   readonly name?: string
+  readonly type?: string
+  readonly file: string
   readonly dependencies: readonly GraphNode[]
 }
 

@@ -1,11 +1,12 @@
-import fs from 'fs'
+// import fs from 'fs'
 import path from 'path'
-import express from 'express'
-import { createServer as createViteServer } from 'vite'
-import { Project, SourceFile } from 'ts-morph'
+// import express from 'express'
+// import { createServer as createViteServer } from 'vite'
 import { getInjectableCore } from './injectable-ts-core'
+import { buildGraph } from './graph'
+import { newProject } from './project'
 
-const SELF = path.resolve(__dirname)
+// const SELF = path.resolve(__dirname)
 
 const PROJECT_ROOT =
   '/Users/raveclassic/WebstormProjects/dexscreener/ds/packages/util-network'
@@ -74,10 +75,13 @@ const PROJECT_TS_CONFIG = path.resolve(PROJECT_ROOT, 'tsconfig.lib.json')
 // }
 //
 // void createServer()
-const project = new Project({
-  tsConfigFilePath: PROJECT_TS_CONFIG,
-})
+const project = newProject(PROJECT_TS_CONFIG)
 
-console.info({
-  core: getInjectableCore(project),
-})
+const core = getInjectableCore(project)
+// const tokens = getTokenNodes(project, core)
+//
+// // console.info({
+// // tokens: getTokenNodes(project, core),
+// // })
+// getInjectableNodes(project, core, tokens)
+buildGraph(project, core)
