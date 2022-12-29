@@ -25,4 +25,3 @@ export type NormalizedGraphNode =
   | NormalizedInjectableGraphNode
 
 export interface NormalizedGraph extends Record<string, NormalizedGraphNode> {}
-export interface NormalizedGraphs extends ReadonlyArray<NormalizedGraph> {}

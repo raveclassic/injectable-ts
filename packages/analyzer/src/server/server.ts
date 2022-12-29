@@ -76,12 +76,6 @@ const PROJECT_TS_CONFIG = path.resolve(PROJECT_ROOT, 'tsconfig.lib.json')
 //
 // void createServer()
 const project = newProject(PROJECT_TS_CONFIG)
-
 const core = getInjectableCore(project)
-// const tokens = getTokenNodes(project, core)
-//
-// // console.info({
-// // tokens: getTokenNodes(project, core),
-// // })
-// getInjectableNodes(project, core, tokens)
-buildGraph(project, core)
+const graph = buildGraph(project, core)
+console.log(graph)

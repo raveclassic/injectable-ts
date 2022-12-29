@@ -1,10 +1,8 @@
 import { Project, Node, ts, CallExpression } from 'ts-morph'
-import { GraphNode } from '../shared/domain/entities/graph-node/graph-node'
 import { InjectableCore } from './injectable-ts-core'
 import {
   NormalizedGraph,
   NormalizedGraphNode,
-  NormalizedGraphs,
 } from '../shared/domain/entities/normalized-graph-node/normalized-graph-node'
 
 interface IDMap extends Map<Node<ts.Node>, string> {}
@@ -162,7 +160,7 @@ function getInjectableArguments(
 export function buildGraph(
   project: Project,
   core: InjectableCore
-): NormalizedGraphs {
+): NormalizedGraph {
   const ids = new Map<Node<ts.Node>, string>()
 
   const graph: NormalizedGraph = {}
@@ -170,6 +168,5 @@ export function buildGraph(
   visitTokens(project, core, graph, ids)
   visitInjectables(project, core, graph, ids)
 
-  console.log(graph)
-  return []
+  return graph
 }
