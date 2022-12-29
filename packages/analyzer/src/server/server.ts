@@ -9,8 +9,8 @@ import { newProject } from './project'
 const SELF = path.resolve(__dirname)
 
 const PROJECT_ROOT =
-  '/Users/raveclassic/WebstormProjects/dexscreener/ds/packages/util-network'
-const PROJECT_TS_CONFIG = path.resolve(PROJECT_ROOT, 'tsconfig.lib.json')
+  '/Users/raveclassic/WebstormProjects/dexscreener/ds/apps/native'
+const PROJECT_TS_CONFIG = path.resolve(PROJECT_ROOT, 'tsconfig.app.json')
 // const INJECTABLE_TS_DECLARATION_FILE = path.resolve(
 //   PROJECT_ROOT,
 //   '../../node_modules/@injectable-ts/core/src/index.d.ts'
