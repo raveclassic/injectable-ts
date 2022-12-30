@@ -20,8 +20,17 @@ interface NormalizedInjectableGraphNode {
   dependencyIds: string[]
 }
 
+interface NormalizedUseInjectableGraphNode {
+  readonly kind: 'useInjectable'
+  readonly id: string
+  readonly file: string
+  readonly identifier: string
+  readonly targetId: string
+}
+
 export type NormalizedGraphNode =
   | NormalizedTokenGraphNode
   | NormalizedInjectableGraphNode
+  | NormalizedUseInjectableGraphNode
 
 export interface NormalizedGraph extends Record<string, NormalizedGraphNode> {}

@@ -16,14 +16,7 @@
 // import cola from 'cytoscape-cola'
 import fcose from 'cytoscape-fcose'
 import cytoscapeLayoutUtilities from 'cytoscape-layout-utilities'
-import {
-  memo,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { memo, useEffect, useState } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import {
   NormalizedGraph,
@@ -63,7 +56,7 @@ export const App = memo(() => {
   useEffect(() => {
     if (!graphElement || !graph) return
 
-    const cx = cytoscape({
+    const cy = cytoscape({
       container: graphElement,
       // boxSelectionEnabled: false,
       // autoungrabify: true,
@@ -108,6 +101,9 @@ export const App = memo(() => {
                 case 'injectable': {
                   return '#ec37ff'
                 }
+                case 'useInjectable': {
+                  return '#3748ff'
+                }
               }
             },
             label: (node: NodeSingular) => {
@@ -118,7 +114,7 @@ export const App = memo(() => {
             },
             'text-wrap': 'wrap',
             'text-margin-y': -10,
-            'font-size': 10,
+            // 'font-size': 10,
           },
         },
 
@@ -138,7 +134,13 @@ export const App = memo(() => {
       layout: {
         name: 'fcose',
         nodeDimensionsIncludeLabels: true,
-        packComponents: true,
+        // uniformNodeDimensions: true,
+        // animate: false,
+        // fit: true,
+        // nodeSeparation: 150,
+        // quality: 'proof',
+        // randomize: false,
+        // packComponents: true,
       },
 
       // layout: {
@@ -176,6 +178,8 @@ export const App = memo(() => {
       //   //   rows: 1,
       // },
     })
+
+    // ;(cy as any).layoutUtilities({})
   }, [graph, graphElement])
 
   return (
@@ -214,9 +218,21 @@ const GraphStyled = styled.div`
   flex: 1;
 `
 
+///^apps\/([^\/]+)(?:\/src\/(domain(?:\/(services|repositories|entities|use-cases))?))?/
+interface NodeGroup {
+  readonly label: string
+  readonly children: NodeGroups
+}
+interface NodeGroups extends Record<string, NodeGroup> {}
+
 function getNodeGroup(node: NormalizedGraphNode): string | undefined {
   const appMatch = node.file.match(/^apps\/([^/]+)\//)
   if (appMatch) {
+    const app = appMatch[1]
+    const subdomain = node.file.slice(`apps/${app}/src/`.length)
+    const subdomainMatch = subdomain.match(/^([^/]+)\//)
+    console.log(subdomain)
+    // const subdomainMatch =
     return appMatch[1]
   }
   const packageMatch = node.file.match(/^packages\/([^/]+)\//)
@@ -224,6 +240,20 @@ function getNodeGroup(node: NormalizedGraphNode): string | undefined {
     return packageMatch[1]
   }
 }
+
+// function buildGroups(graph: NormalizedGraph): NodeGroup {
+//   for (const node of Object.values(graph)) {
+//     const packageMatch = node.file.match(/^packages\/([^/]+)\//)
+//     if (packageMatch) {
+//       return packageMatch[1]
+//     }
+//
+//     // const appDomainMatch = node.file.match()
+//     const appMatch = node.file.match(/^apps\/(.+?)\//)
+//     if (appMatch) {
+//     }
+//   }
+// }
 
 function buildElements(graph: NormalizedGraph): ElementDefinition[] {
   const elements: ElementDefinition[] = []
@@ -274,6 +304,25 @@ function buildElements(graph: NormalizedGraph): ElementDefinition[] {
           })
         }
         break
+      }
+      case 'useInjectable': {
+        elements.push(
+          {
+            data: {
+              id: node.id,
+              node,
+              parent,
+            },
+          },
+          {
+            data: {
+              id: `${node.id}->${node.targetId}`,
+              node,
+              source: node.id,
+              target: node.targetId,
+            },
+          }
+        )
       }
     }
   }

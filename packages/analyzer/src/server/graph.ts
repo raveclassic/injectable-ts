@@ -1,10 +1,18 @@
-import { Project, Node, ts, CallExpression } from 'ts-morph'
+import {
+  Project,
+  Node,
+  ts,
+  CallExpression,
+  FunctionDeclaration,
+  VariableDeclaration,
+} from 'ts-morph'
 import { InjectableCore } from './injectable-ts-core'
 import path from 'path'
 import {
   NormalizedGraph,
   NormalizedGraphNode,
 } from '../shared/domain/entities/normalized-graph-node/normalized-graph-node'
+import { InjectableTsReact } from './injectable-ts-react'
 
 interface IDMap extends Map<Node<ts.Node>, string> {}
 
@@ -162,9 +170,114 @@ function getInjectableArguments(
   return [undefined, injectableDependencies]
 }
 
+function findParent<Result extends Node<ts.Node>>(
+  node: Node<ts.Node>,
+  predicate: (node: Node<ts.Node>) => node is Result
+): Result | undefined
+function findParent(
+  node: Node<ts.Node>,
+  predicate: (node: Node<ts.Node>) => boolean
+): Node<ts.Node> | undefined {
+  let current = node.getParent()
+
+  while (current !== undefined && !predicate(current)) {
+    current = current.getParent()
+  }
+
+  return current
+}
+
+function getUseInjectableIdentifier(
+  useInjectableNode: CallExpression
+): string | undefined {
+  let parent = useInjectableNode.getParent()
+  while (parent !== undefined) {
+    if (Node.isArrowFunction(parent)) {
+      const variabledeclaration = findParent(parent, Node.isVariableDeclaration)
+      if (variabledeclaration !== undefined) {
+        return variabledeclaration.getName()
+      }
+    }
+
+    if (Node.isFunctionDeclaration(parent)) {
+      const name = parent.getName()
+      if (name !== undefined) {
+        return name
+      }
+    }
+
+    parent = parent.getParent()
+  }
+}
+
+function getUseInjectableTargetId(
+  target: Node<ts.Node>,
+  ids: IDMap
+): string | undefined {
+  if (Node.isIdentifier(target)) {
+    for (const definition of target.getDefinitionNodes()) {
+      const id = ids.get(definition)
+      if (id !== undefined) {
+        return id
+      }
+    }
+  }
+}
+
+function visitUseInjectable(
+  node: Node<ts.Node>,
+  graph: NormalizedGraph,
+  ids: IDMap,
+  cwd: string
+): NormalizedGraphNode | undefined {
+  const useInjectableNode = node.getParent()
+
+  if (!Node.isCallExpression(useInjectableNode)) return
+  // "useInjectable(target)"
+  const useInjectableArguments = useInjectableNode.getArguments()
+  if (useInjectableArguments.length === 0) return
+
+  const target = useInjectableArguments[0]
+  const targetId = getUseInjectableTargetId(target, ids)
+
+  if (targetId === undefined) return
+
+  const identifier = getUseInjectableIdentifier(useInjectableNode)
+
+  if (identifier === undefined) {
+    throw new Error('Cannot find useInjectable component identifier')
+  }
+
+  // console.log(identifier.getText())
+  const graphNode: NormalizedGraphNode = {
+    kind: 'useInjectable',
+    id: getNextId(),
+    file: path.relative(cwd, node.getSourceFile().getFilePath()),
+    identifier,
+    targetId,
+  }
+
+  graph[graphNode.id] = graphNode
+
+  return graphNode
+}
+
+function visitUseInjectables(
+  project: Project,
+  react: InjectableTsReact,
+  graph: NormalizedGraph,
+  ids: IDMap,
+  cwd: string
+): void {
+  for (const node of react.useInjectable.findReferencesAsNodes()) {
+    visitUseInjectable(node, graph, ids, cwd)
+  }
+}
+
 export function buildGraph(
   project: Project,
   core: InjectableCore,
+  react: InjectableTsReact,
   cwd: string
 ): NormalizedGraph {
   const ids = new Map<Node<ts.Node>, string>()
@@ -173,6 +286,7 @@ export function buildGraph(
 
   visitTokens(project, core, graph, ids, cwd)
   visitInjectables(project, core, graph, ids, cwd)
+  visitUseInjectables(project, react, graph, ids, cwd)
 
   return graph
 }

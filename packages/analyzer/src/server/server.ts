@@ -6,6 +6,7 @@ import { getInjectableCore } from './injectable-ts-core'
 import { buildGraph } from './graph'
 import { newProject } from './project'
 import { NormalizedGraph } from '../shared/domain/entities/normalized-graph-node/normalized-graph-node'
+import { getInjectableReact } from './injectable-ts-react'
 
 const SELF = path.resolve(__dirname)
 
@@ -101,9 +102,12 @@ function getGraph() {
     const graph: NormalizedGraph = JSON.parse(fs.readFileSync(DUMP, 'utf-8'))
     return graph
   }
+  console.log('[@injectable-ts/analyzer] Reading project...')
   const project = newProject(PROJECT_TS_CONFIG)
   const core = getInjectableCore(project)
-  const graph = buildGraph(project, core, CWD)
+  const react = getInjectableReact(project)
+  console.log('[@injectable-ts/analyzer] Building graph...')
+  const graph = buildGraph(project, core, react, CWD)
   fs.writeFileSync(DUMP, JSON.stringify(graph))
   return graph
 }

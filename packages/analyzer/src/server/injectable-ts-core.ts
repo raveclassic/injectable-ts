@@ -4,6 +4,7 @@ import {
   SourceFile,
   VariableDeclaration,
 } from 'ts-morph'
+import { last } from '../shared/utils/array'
 
 export interface InjectableCore {
   readonly token: FunctionDeclaration | VariableDeclaration
@@ -11,13 +12,10 @@ export interface InjectableCore {
   readonly provide: FunctionDeclaration | VariableDeclaration
 }
 
-const last = <T>(input: readonly T[] | undefined): T | undefined =>
-  input ? input[input.length - 1] : undefined
-
-export const getInjectableCore = (
+export function getInjectableCore(
   project: Project,
   pathToInjectableCore?: string
-): InjectableCore => {
+): InjectableCore {
   const core =
     pathToInjectableCore !== undefined
       ? project.getSourceFile(pathToInjectableCore)
@@ -63,9 +61,9 @@ export const getInjectableCore = (
   }
 }
 
-const findInjectableTSCoreSourceFile = (
+function findInjectableTSCoreSourceFile(
   project: Project
-): SourceFile | undefined => {
+): SourceFile | undefined {
   for (const source of project.getSourceFiles()) {
     const importDeclaration = source.getImportDeclaration('@injectable-ts/core')
     if (importDeclaration) {
