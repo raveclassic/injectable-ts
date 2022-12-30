@@ -274,6 +274,37 @@ function visitUseInjectables(
   }
 }
 
+function cleanup(graph: NormalizedGraph) {
+  const nodes = Object.values(graph)
+  for (const dependency of nodes) {
+    switch (dependency.kind) {
+      case 'token':
+      case 'injectable': {
+        if (
+          // checked by TS
+          // eslint-disable-next-line array-callback-return
+          !nodes.some((node): boolean => {
+            switch (node.kind) {
+              case 'token': {
+                return false
+              }
+              case 'useInjectable': {
+                return node.targetId === dependency.id
+              }
+              case 'injectable': {
+                return node.dependencyIds.includes(dependency.id)
+              }
+            }
+          })
+        ) {
+          // delete
+          delete graph[dependency.id]
+        }
+      }
+    }
+  }
+}
+
 export function buildGraph(
   project: Project,
   core: InjectableCore,
@@ -287,6 +318,7 @@ export function buildGraph(
   visitTokens(project, core, graph, ids, cwd)
   visitInjectables(project, core, graph, ids, cwd)
   visitUseInjectables(project, react, graph, ids, cwd)
+  cleanup(graph)
 
   return graph
 }

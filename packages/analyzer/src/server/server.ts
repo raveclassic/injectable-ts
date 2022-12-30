@@ -109,5 +109,6 @@ function getGraph() {
   console.log('[@injectable-ts/analyzer] Building graph...')
   const graph = buildGraph(project, core, react, CWD)
   fs.writeFileSync(DUMP, JSON.stringify(graph))
+  console.log('[@injectable-ts/analyzer] Done')
   return graph
 }
