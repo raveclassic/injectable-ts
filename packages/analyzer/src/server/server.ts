@@ -5,17 +5,20 @@ import { createServer as createViteServer } from 'vite'
 import { getInjectableCore } from './injectable-ts-core'
 import { buildGraph } from './graph'
 import { newProject } from './project'
+import { NormalizedGraph } from '../shared/domain/entities/normalized-graph-node/normalized-graph-node'
 
 const SELF = path.resolve(__dirname)
 
-const PROJECT_ROOT =
-  '/Users/raveclassic/WebstormProjects/dexscreener/ds/apps/native'
+const CWD = '/Users/raveclassic/WebstormProjects/dexscreener/ds'
+const PROJECT_ROOT = path.resolve(CWD, 'apps/native')
 const PROJECT_TS_CONFIG = path.resolve(PROJECT_ROOT, 'tsconfig.app.json')
 // const INJECTABLE_TS_DECLARATION_FILE = path.resolve(
 //   PROJECT_ROOT,
 //   '../../node_modules/@injectable-ts/core/src/index.d.ts'
 // )
 //
+const DUMP = path.resolve(SELF, 'dump.json')
+
 async function main(): Promise<void> {
   const app = express()
 
@@ -33,9 +36,7 @@ async function main(): Promise<void> {
 
   app.get('/graph', async (req, res, next) => {
     try {
-      const project = newProject(PROJECT_TS_CONFIG)
-      const core = getInjectableCore(project)
-      const graph = buildGraph(project, core)
+      const graph = getGraph()
 
       res
         .status(200)
@@ -94,3 +95,15 @@ async function main(): Promise<void> {
 }
 
 void main()
+
+function getGraph() {
+  if (fs.existsSync(DUMP)) {
+    const graph: NormalizedGraph = JSON.parse(fs.readFileSync(DUMP, 'utf-8'))
+    return graph
+  }
+  const project = newProject(PROJECT_TS_CONFIG)
+  const core = getInjectableCore(project)
+  const graph = buildGraph(project, core, CWD)
+  fs.writeFileSync(DUMP, JSON.stringify(graph))
+  return graph
+}

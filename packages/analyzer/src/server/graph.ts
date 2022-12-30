@@ -1,5 +1,6 @@
 import { Project, Node, ts, CallExpression } from 'ts-morph'
 import { InjectableCore } from './injectable-ts-core'
+import path from 'path'
 import {
   NormalizedGraph,
   NormalizedGraphNode,
@@ -15,7 +16,8 @@ function getNextId(): string {
 function visitTokenNode(
   node: Node<ts.Node>,
   graph: NormalizedGraph,
-  ids: IDMap
+  ids: IDMap,
+  cwd: string
 ): NormalizedGraphNode | undefined {
   const parent = node.getParent()
 
@@ -52,7 +54,7 @@ function visitTokenNode(
     kind: 'token',
     id: getNextId(),
     name: tokenName,
-    file: node.getSourceFile().getFilePath(),
+    file: path.relative(cwd, node.getSourceFile().getFilePath()),
     type: tokenType.getText(),
     identifier: identifier.getNameNode().getText(),
   }
@@ -67,17 +69,19 @@ function visitTokens(
   project: Project,
   core: InjectableCore,
   graph: NormalizedGraph,
-  ids: IDMap
+  ids: IDMap,
+  cwd: string
 ): void {
   for (const node of core.token.findReferencesAsNodes()) {
-    visitTokenNode(node, graph, ids)
+    visitTokenNode(node, graph, ids, cwd)
   }
 }
 
 function visitInjectable(
   node: Node<ts.Node>,
   graph: NormalizedGraph,
-  ids: IDMap
+  ids: IDMap,
+  cwd: string
 ): NormalizedGraphNode | undefined {
   const parent = node.getParent()
 
@@ -101,7 +105,7 @@ function visitInjectable(
     kind: 'injectable',
     name,
     id: getNextId(),
-    file: parent.getSourceFile().getFilePath(),
+    file: path.relative(cwd, parent.getSourceFile().getFilePath()),
     // type: 'WUT',
     identifier: identifier.getNameNode().getText(),
     dependencyIds: [],
@@ -130,10 +134,11 @@ const visitInjectables = (
   project: Project,
   core: InjectableCore,
   graph: NormalizedGraph,
-  ids: IDMap
+  ids: IDMap,
+  cwd: string
 ): void => {
   for (const node of core.injectable.findReferencesAsNodes()) {
-    visitInjectable(node, graph, ids)
+    visitInjectable(node, graph, ids, cwd)
   }
 }
 
@@ -159,14 +164,15 @@ function getInjectableArguments(
 
 export function buildGraph(
   project: Project,
-  core: InjectableCore
+  core: InjectableCore,
+  cwd: string
 ): NormalizedGraph {
   const ids = new Map<Node<ts.Node>, string>()
 
   const graph: NormalizedGraph = {}
 
-  visitTokens(project, core, graph, ids)
-  visitInjectables(project, core, graph, ids)
+  visitTokens(project, core, graph, ids, cwd)
+  visitInjectables(project, core, graph, ids, cwd)
 
   return graph
 }

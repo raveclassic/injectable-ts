@@ -12,8 +12,8 @@
 //     </StyledApp>
 //   )
 // }
-import dagre from 'cytoscape-dagre'
-
+// import dagre from 'cytoscape-dagre'
+import cola from 'cytoscape-cola'
 import {
   memo,
   useEffect,
@@ -28,6 +28,8 @@ import {
   NormalizedGraphNode,
 } from '../shared/domain/entities/normalized-graph-node/normalized-graph-node'
 import cytoscape, { ElementDefinition, NodeSingular } from 'cytoscape'
+
+cytoscape.use(cola)
 
 export const App = memo(() => {
   const [graph, setGraph] = useState<NormalizedGraph | undefined>()
@@ -56,7 +58,6 @@ export const App = memo(() => {
 
   useEffect(() => {
     if (!graphElement || !graph) return
-    cytoscape.use(dagre)
 
     const cx = cytoscape({
       container: graphElement,
@@ -86,8 +87,8 @@ export const App = memo(() => {
           selector: 'node',
           style: {
             // shape: 'barrel',
-            width: 20,
-            height: 20,
+            // width: 20,
+            // height: 20,
             // events: 'no',
             // 'background-color': '#666',
             'background-color': (node) => {
@@ -104,10 +105,11 @@ export const App = memo(() => {
             },
             label: (node: NodeSingular) => {
               const graphNode = getGraphNode(node)
-              return graphNode.identifier
+              return `${graphNode.identifier}\n${graphNode.file}`
             },
             'text-wrap': 'wrap',
             'text-margin-y': -10,
+            'font-size': 10,
           },
         },
 
@@ -125,8 +127,37 @@ export const App = memo(() => {
       ],
 
       layout: {
-        name: 'dagre',
+        // name: 'dagre',
         nodeDimensionsIncludeLabels: true,
+        name: 'concentric',
+        fit: true,
+        // minNodeSpacing: 1,
+        spacingFactor: 0.4,
+        // animate: true,
+        // animationDuration: 2000,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        concentric(node: any): number {
+          const graphNode = getGraphNode(node)
+          const level = -getNodeLevel(graphNode)
+          // console.log(node.indexOf(), node.indexOfId(), level, graphNode.file)
+          return level
+          // return node.degree()
+          // if (graphNode.file.includes('ds/apps/native/domain')) {
+          //   return 1
+          // } else if (graphNode.file.includes('ds/apps/native/data')) {
+          //   return 2
+          // } else if (graphNode.file.includes('ds/apps/native/ui')) {
+          //   return 3
+          // }
+          // // const isApp = !!graphNode.file.match(/ds\/apps/)
+          // // const isIsPackage = !!graphNode.file.match(/ds\/packages/)
+          // // if (isApp) return 100
+          // // if (isIsPackage) return 99
+          // // return node.degree()
+          // // return Math.round(Math.random() * 100)
+          // return 4
+        },
+        levelWidth: (nodes) => 1,
         //   rows: 1,
       },
     })
@@ -187,7 +218,7 @@ function buildElements(graph: NormalizedGraph): ElementDefinition[] {
           data: {
             id: node.id,
             node,
-            parent: node.file,
+            // parent: node.file,
           },
         })
         break
@@ -197,7 +228,7 @@ function buildElements(graph: NormalizedGraph): ElementDefinition[] {
           data: {
             id: node.id,
             node,
-            parent: node.file,
+            // parent: node.file,
           },
         })
         for (const dependencyId of node.dependencyIds) {
@@ -218,6 +249,65 @@ function buildElements(graph: NormalizedGraph): ElementDefinition[] {
   return elements
 }
 
-function getGraphNode(node: NodeSingular): NormalizedGraphNode {
+function getGraphNode(node: Pick<NodeSingular, 'data'>): NormalizedGraphNode {
   return node.data('node')
+}
+
+// first - more important
+const levels = [
+  {
+    token: /^apps\/native\/src\/domain\//,
+    injectables: [
+      /^apps\/native\/src\/domain\/(entities|types)\//,
+      /^apps\/native\/src\/domain\/(services|use-cases)\//,
+      /^apps\/native\/src\/domain\/(repositories)\//,
+      /^apps\/native\/src\/domain\/(utils|validators)\//,
+    ],
+  },
+  {
+    token: /^apps\/native\/src\/data\//,
+    injectables: [
+      /^apps\/native\/src\/data\/(repositories)\//,
+      /^apps\/native\/src\/data\/(services)\//,
+      /^apps\/native\/src\/data\/(data-source)\//,
+      /^apps\/native\/src\/data\/(schema)\//,
+      /^apps\/native\/src\/data\/(client)\//,
+    ],
+  },
+  {
+    token: /^apps\/native\/src\/ui\//,
+    injectables: [/^apps\/native\/src\/ui\//],
+  },
+  {
+    token: /^packages\//,
+    injectables: [/^packages\//],
+  },
+]
+const getLevelOffset = (level: typeof levels[number]): number =>
+  1 + level.injectables.length
+function getNodeLevel(node: NormalizedGraphNode): number {
+  for (let levelIndex = 0; levelIndex < levels.length; levelIndex++) {
+    let offset = 0
+    for (let j = levelIndex - 1; j >= 0; j--) {
+      offset += getLevelOffset(levels[j])
+    }
+    switch (node.kind) {
+      case 'token': {
+        if (node.file.match(levels[levelIndex].token)) {
+          return offset
+        }
+        break
+      }
+      case 'injectable': {
+        const injectablesLength = levels[levelIndex].injectables.length
+        for (let j = 0; j < injectablesLength; j++) {
+          if (node.file.match(levels[levelIndex].injectables[j])) {
+            return offset + j + 1
+          }
+        }
+        break
+      }
+    }
+  }
+  throw new Error('Cannot find level')
 }
