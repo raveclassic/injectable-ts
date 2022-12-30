@@ -13,7 +13,9 @@
 //   )
 // }
 // import dagre from 'cytoscape-dagre'
-import cola from 'cytoscape-cola'
+// import cola from 'cytoscape-cola'
+import fcose from 'cytoscape-fcose'
+import cytoscapeLayoutUtilities from 'cytoscape-layout-utilities'
 import {
   memo,
   useEffect,
@@ -28,8 +30,10 @@ import {
   NormalizedGraphNode,
 } from '../shared/domain/entities/normalized-graph-node/normalized-graph-node'
 import cytoscape, { ElementDefinition, NodeSingular } from 'cytoscape'
+import { v4 } from 'uuid'
 
-cytoscape.use(cola)
+cytoscape.use(fcose)
+cytoscape.use(cytoscapeLayoutUtilities)
 
 export const App = memo(() => {
   const [graph, setGraph] = useState<NormalizedGraph | undefined>()
@@ -93,6 +97,9 @@ export const App = memo(() => {
             // 'background-color': '#666',
             'background-color': (node) => {
               const graphNode = getGraphNode(node)
+              if (!graphNode) {
+                return 'white'
+              }
 
               switch (graphNode.kind) {
                 case 'token': {
@@ -105,7 +112,9 @@ export const App = memo(() => {
             },
             label: (node: NodeSingular) => {
               const graphNode = getGraphNode(node)
-              return `${graphNode.identifier}\n${graphNode.file}`
+              if (!graphNode) return node.data('label') ?? ''
+              return graphNode.identifier
+              // return `${graphNode.identifier}\n${graphNode.file}`
             },
             'text-wrap': 'wrap',
             'text-margin-y': -10,
@@ -127,39 +136,45 @@ export const App = memo(() => {
       ],
 
       layout: {
-        // name: 'dagre',
+        name: 'fcose',
         nodeDimensionsIncludeLabels: true,
-        name: 'concentric',
-        fit: true,
-        // minNodeSpacing: 1,
-        spacingFactor: 0.4,
-        // animate: true,
-        // animationDuration: 2000,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        concentric(node: any): number {
-          const graphNode = getGraphNode(node)
-          const level = -getNodeLevel(graphNode)
-          // console.log(node.indexOf(), node.indexOfId(), level, graphNode.file)
-          return level
-          // return node.degree()
-          // if (graphNode.file.includes('ds/apps/native/domain')) {
-          //   return 1
-          // } else if (graphNode.file.includes('ds/apps/native/data')) {
-          //   return 2
-          // } else if (graphNode.file.includes('ds/apps/native/ui')) {
-          //   return 3
-          // }
-          // // const isApp = !!graphNode.file.match(/ds\/apps/)
-          // // const isIsPackage = !!graphNode.file.match(/ds\/packages/)
-          // // if (isApp) return 100
-          // // if (isIsPackage) return 99
-          // // return node.degree()
-          // // return Math.round(Math.random() * 100)
-          // return 4
-        },
-        levelWidth: (nodes) => 1,
-        //   rows: 1,
+        packComponents: true,
       },
+
+      // layout: {
+      //   // name: 'dagre',
+      //   nodeDimensionsIncludeLabels: true,
+      //   name: 'concentric',
+      //   fit: true,
+      //   // minNodeSpacing: 1,
+      //   spacingFactor: 0.4,
+      //   // animate: true,
+      //   // animationDuration: 2000,
+      //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      //   concentric(node: any): number {
+      //     const graphNode = getGraphNode(node)
+      //     const level = -getNodeLevel(graphNode)
+      //     // console.log(node.indexOf(), node.indexOfId(), level, graphNode.file)
+      //     return level
+      //     // return node.degree()
+      //     // if (graphNode.file.includes('ds/apps/native/domain')) {
+      //     //   return 1
+      //     // } else if (graphNode.file.includes('ds/apps/native/data')) {
+      //     //   return 2
+      //     // } else if (graphNode.file.includes('ds/apps/native/ui')) {
+      //     //   return 3
+      //     // }
+      //     // // const isApp = !!graphNode.file.match(/ds\/apps/)
+      //     // // const isIsPackage = !!graphNode.file.match(/ds\/packages/)
+      //     // // if (isApp) return 100
+      //     // // if (isIsPackage) return 99
+      //     // // return node.degree()
+      //     // // return Math.round(Math.random() * 100)
+      //     // return 4
+      //   },
+      //   levelWidth: (nodes) => 1,
+      //   //   rows: 1,
+      // },
     })
   }, [graph, graphElement])
 
@@ -199,26 +214,43 @@ const GraphStyled = styled.div`
   flex: 1;
 `
 
+function getNodeGroup(node: NormalizedGraphNode): string | undefined {
+  const appMatch = node.file.match(/^apps\/([^/]+)\//)
+  if (appMatch) {
+    return appMatch[1]
+  }
+  const packageMatch = node.file.match(/^packages\/([^/]+)\//)
+  if (packageMatch) {
+    return packageMatch[1]
+  }
+}
+
 function buildElements(graph: NormalizedGraph): ElementDefinition[] {
   const elements: ElementDefinition[] = []
-  const files = new Set<string>()
+  const groups = new Map<string, string>()
 
   for (const node of Object.values(graph)) {
-    // if (!files.has(node.file)) {
-    //   files.add(node.file)
-    //   elements.push({
-    //     data: {
-    //       id: node.file,
-    //     },
-    //   })
-    // }
+    const group = getNodeGroup(node)
+    if (group !== undefined && !groups.has(group)) {
+      const groupId = v4()
+      groups.set(group, groupId)
+      elements.push({
+        data: {
+          id: groupId,
+          label: group,
+        },
+      })
+    }
+
+    const parent = group !== undefined ? groups.get(group) : undefined
+
     switch (node.kind) {
       case 'token': {
         elements.push({
           data: {
             id: node.id,
             node,
-            // parent: node.file,
+            parent,
           },
         })
         break
@@ -228,7 +260,7 @@ function buildElements(graph: NormalizedGraph): ElementDefinition[] {
           data: {
             id: node.id,
             node,
-            // parent: node.file,
+            parent,
           },
         })
         for (const dependencyId of node.dependencyIds) {
@@ -249,7 +281,9 @@ function buildElements(graph: NormalizedGraph): ElementDefinition[] {
   return elements
 }
 
-function getGraphNode(node: Pick<NodeSingular, 'data'>): NormalizedGraphNode {
+function getGraphNode(
+  node: Pick<NodeSingular, 'data'>
+): NormalizedGraphNode | undefined {
   return node.data('node')
 }
 
