@@ -32,4 +32,11 @@ describe('token', () => {
     foo.key
     expect(foo.key).toEqual('foo')
   })
+  it('produces optional token for optional types', () => {
+    const foo = token('foo')<string | undefined>()
+    // $ExpectType string | undefined
+    type t1 = InjectableValue<typeof foo>
+    // check that token can be invoked without optional dependency
+    foo({})
+  })
 })

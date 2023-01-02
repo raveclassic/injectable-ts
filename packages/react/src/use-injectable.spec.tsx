@@ -101,4 +101,20 @@ describe('useInjectable', () => {
     )
     expect(cb).toHaveBeenLastCalledWith('bar')
   })
+  it('supports optional tokens', () => {
+    const foo = token('foo')<string | undefined>()
+    const cb = jest.fn()
+    const Component = () => {
+      cb(useInjectable(foo))
+      return null
+    }
+    render(
+      <StrictMode>
+        <DependenciesProvider value={{}}>
+          <Component />
+        </DependenciesProvider>
+      </StrictMode>
+    )
+    expect(cb).toHaveBeenLastCalledWith(undefined)
+  })
 })
