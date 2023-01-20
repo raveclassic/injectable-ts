@@ -1,14 +1,14 @@
 import { StrictMode } from 'react'
 import * as ReactDOM from 'react-dom/client'
 
-import { App } from '../app/app'
+import { GoApp } from '../app/go-app'
 
 const rootElement = document.getElementById('root')
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <App />
+      <GoApp />
     </StrictMode>
   )
 }

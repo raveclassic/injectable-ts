@@ -17,13 +17,14 @@
 import fcose from 'cytoscape-fcose'
 import cytoscapeLayoutUtilities from 'cytoscape-layout-utilities'
 import { memo, useEffect, useState } from 'react'
-import styled, { createGlobalStyle } from 'styled-components'
+import styled from 'styled-components'
 import {
   NormalizedGraph,
   NormalizedGraphNode,
 } from '../shared/domain/entities/normalized-graph-node/normalized-graph-node'
 import cytoscape, { ElementDefinition, NodeSingular } from 'cytoscape'
 import { v4 } from 'uuid'
+import { GlobalStyled } from './global.styled'
 
 cytoscape.use(fcose)
 cytoscape.use(cytoscapeLayoutUtilities)
@@ -192,14 +193,6 @@ export const App = memo(() => {
     </>
   )
 })
-
-const GlobalStyled = createGlobalStyle`
-  body, html, #root {
-    height: 100%;
-    padding: 0;
-    margin: 0;
-  }
-`
 
 const AppStyled = styled.div`
   width: 100%;
