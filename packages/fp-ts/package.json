@@ -2,6 +2,7 @@
   "name": "@injectable-ts/fp-ts",
   "version": "1.0.0-alpha.3",
   "type": "commonjs",
+  "sideEffects": false,
   "dependencies": {
     "@injectable-ts/core": "^1.0.0-alpha.3"
   },
