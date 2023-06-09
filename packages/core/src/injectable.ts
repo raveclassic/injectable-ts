@@ -67,11 +67,16 @@ export type InjectableDependencies<Target> = Merge<
 >
 
 type MapInjectablesToValues<Targets> = {
-  readonly [Index in keyof Targets]: InjectableValue<Targets[Index]>
+  readonly [Index in keyof Targets]: Targets[Index] extends Promise<infer T>
+    ? InjectableValue<T>
+    : InjectableValue<Targets[Index]>
 }
 
 type MergeDependencies<
-  Inputs extends readonly Injectable<UnknownDependencyTree, unknown>[],
+  Inputs extends readonly (
+    | Injectable<UnknownDependencyTree, unknown>
+    | Promise<Injectable<UnknownDependencyTree, unknown>>
+  )[],
   Name extends PropertyKey | never,
   Type
 > = {
@@ -79,7 +84,9 @@ type MergeDependencies<
   readonly type: Type
   readonly optional: Name extends never ? false : true
   readonly children: {
-    readonly [Index in keyof Inputs]: InjectableDependencyTree<Inputs[Index]>
+    readonly [Index in keyof Inputs]: Inputs[Index] extends Promise<infer T>
+      ? InjectableDependencyTree<T>
+      : InjectableDependencyTree<Inputs[Index]>
   }
 }
 
@@ -118,6 +125,25 @@ export function injectable<
   },
   Value
 >
+// must always come after regular `Inputs extends readonly Injectable<UnknownDependencyTree, unknown>[]` signature
+export function injectable<
+  Inputs extends readonly (
+    | Injectable<UnknownDependencyTree, unknown>
+    | Promise<Injectable<UnknownDependencyTree, unknown>>
+  )[],
+  Value
+>(
+  ...args: [...Inputs, (...values: MapInjectablesToValues<Inputs>) => Value]
+): InjectableWithoutName<
+  {
+    readonly [Key in keyof MergeDependencies<
+      Inputs,
+      never,
+      Value
+    >]: MergeDependencies<Inputs, never, Value>[Key]
+  },
+  Promise<Value>
+>
 export function injectable(
   ...args: readonly unknown[]
 ): Injectable<UnknownDependencyTree, unknown> {
@@ -138,8 +164,20 @@ export function injectable(
         return override
       }
     }
-    const values = injectables.map((injectable) => injectable(dependencies))
-    return memoizedProject(...values)
+    const values: unknown[] = []
+    let isAsync = false
+    for (const injectable of injectables) {
+      if (injectable instanceof Promise) {
+        isAsync = true
+        values.push(injectable.then((injectable) => injectable(dependencies)))
+      } else {
+        values.push(injectable(dependencies))
+      }
+    }
+
+    return isAsync
+      ? Promise.all(values).then((values) => memoizedProject(...values))
+      : memoizedProject(...values)
   }
   f.key = name
 

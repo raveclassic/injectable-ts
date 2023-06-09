@@ -115,5 +115,29 @@ describe('injectable', () => {
       type t1 = InjectableValue<typeof c>
       expect(await c({ a: Promise.resolve('a') })).toEqual('ab')
     })
+    it('takes async dependencies', async () => {
+      const result = injectable(
+        Promise.resolve(token('a')<string>()),
+        token('b')<number>(),
+        (
+          // $ExpectType string
+          a,
+          // $ExpectType number
+          b
+        ) => Number(a) + b
+      )
+      // $ExpectType Promise<number>
+      type t1 = InjectableValue<typeof result>
+      expect(await result({ a: '1', b: 1 })).toEqual(2)
+    })
+    it('supports async projection functions', async () => {
+      const result = injectable(token('input')<string>(), async (input) => {
+        await Promise.resolve()
+        return Number(input)
+      })
+      // $ExpectType Promise<number>
+      type t1 = InjectableValue<typeof result>
+      expect(await result({ input: '1' })).toEqual(1)
+    })
   })
 })
