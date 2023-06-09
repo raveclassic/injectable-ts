@@ -85,10 +85,7 @@ type MergeDependencies<
 
 export function injectable<
   Name extends PropertyKey,
-  Inputs extends readonly (
-    | Injectable<UnknownDependencyTree, unknown>
-    | InjectableWithName<UnknownDependencyTree, unknown>
-  )[],
+  Inputs extends readonly Injectable<UnknownDependencyTree, unknown>[],
   Value
 >(
   name: Name,
@@ -146,7 +143,138 @@ export function injectable(
   return f
 }
 
+type ValuesToTuple<T extends Record<string, unknown>> = readonly {
+  [K in keyof T]: T[K]
+}[keyof T][]
+
+export function injectableS<
+  Name extends PropertyKey,
+  Inputs extends Record<string, Injectable<UnknownDependencyTree, unknown>>,
+  Value
+>(
+  name: Name,
+  inputs: Inputs,
+  f: (values: {
+    readonly [Key in keyof Inputs]: InjectableValue<Inputs[Key]>
+  }) => Value
+): InjectableWithName<
+  {
+    readonly [Key in keyof MergeDependencies<
+      ValuesToTuple<Inputs>,
+      Name,
+      Value
+    >]: MergeDependencies<ValuesToTuple<Inputs>, Name, Value>[Key]
+  },
+  Value
+>
+export function injectableS<
+  Inputs extends Record<string, Injectable<UnknownDependencyTree, unknown>>,
+  Value
+>(
+  inputs: Inputs,
+  f: (values: {
+    readonly [Key in keyof Inputs]: InjectableValue<Inputs[Key]>
+  }) => Value
+): InjectableWithoutName<
+  {
+    readonly [Key in keyof MergeDependencies<
+      ValuesToTuple<Inputs>,
+      never,
+      Value
+    >]: MergeDependencies<ValuesToTuple<Inputs>, never, Value>[Key]
+  },
+  Value
+>
+export function injectableS(
+  ...args: readonly unknown[]
+): Injectable<UnknownDependencyTree, unknown> {
+  let name: PropertyKey | undefined
+  let injectables: Record<
+    PropertyKey,
+    Injectable<UnknownDependencyTree, unknown>
+  >
+  let project: (values: Record<string, unknown>) => unknown
+  if (args.length === 3) {
+    // eslint-disable-next-line no-restricted-syntax
+    name = args[0] as PropertyKey
+    // eslint-disable-next-line no-restricted-syntax
+    injectables = args[1] as never
+    // eslint-disable-next-line no-restricted-syntax
+    project = args[2] as never
+  } else {
+    name = undefined
+    // eslint-disable-next-line no-restricted-syntax
+    injectables = args[0] as Record<
+      string,
+      Injectable<UnknownDependencyTree, unknown>
+    >
+    // eslint-disable-next-line no-restricted-syntax
+    project = args[1] as never
+  }
+
+  const memoizedProject = memoS(project)
+
+  const f = (dependencies: Record<PropertyKey, unknown>): unknown => {
+    if (name !== undefined) {
+      const override = dependencies[name]
+      if (override !== undefined) {
+        return override
+      }
+    }
+    const values: Record<PropertyKey, unknown> = {}
+    for (const [name, injectable] of Object.entries(injectables)) {
+      values[name] = injectable(dependencies)
+    }
+    return memoizedProject(values)
+  }
+  f.key = name
+
+  return f
+}
+
 const isPropertyKey = (input: unknown): input is PropertyKey =>
   typeof input === 'string' ||
   typeof input === 'number' ||
   typeof input === 'symbol'
+
+const memoS = <Arg extends Record<PropertyKey, unknown>, Result>(
+  f: (arg: Arg) => Result
+): ((arg: Arg) => Result) => {
+  let hasValue = false
+  let cachedResult: Result
+  let cachedArg: Arg
+  const update = (arg: Arg): void => {
+    cachedResult = f(arg)
+    hasValue = true
+    cachedArg = arg
+  }
+  return (arg: Arg): Result => {
+    const argKeys = Object.keys(arg)
+    if (hasValue) {
+      const cachedArgKeys = Object.keys(cachedArg)
+      if (argKeys.length === 0 && cachedArgKeys.length === 0) {
+        // zero-field argument functions won't change its result
+        return cachedResult
+      }
+
+      if (cachedArgKeys.length !== argKeys.length) {
+        // different number of args
+        update(arg)
+        return cachedResult
+      }
+
+      // same number of fields in the arg, just iterate over them
+      for (const key of argKeys) {
+        if (cachedArg[key] !== arg[key]) {
+          update(arg)
+          return cachedResult
+        }
+      }
+
+      return cachedResult
+    } else {
+      update(arg)
+      return cachedResult
+    }
+  }
+}
