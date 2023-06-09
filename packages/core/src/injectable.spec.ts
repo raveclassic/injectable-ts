@@ -96,4 +96,24 @@ describe('injectable', () => {
     foo.key
     expect(foo.key).toEqual('foo')
   })
+
+  describe('async', () => {
+    it('does not unwrap dependencies producing async values', async () => {
+      const a = token('a')<Promise<string>>()
+      const b = injectable(() => Promise.resolve('b'))
+      const c = injectable(
+        a,
+        b,
+        async (
+          // $ExpectType Promise<string>
+          a,
+          // $ExpectType Promise<string>
+          b
+        ) => (await a) + (await b)
+      )
+      // $ExpectType Promise<string>
+      type t1 = InjectableValue<typeof c>
+      expect(await c({ a: Promise.resolve('a') })).toEqual('ab')
+    })
+  })
 })
