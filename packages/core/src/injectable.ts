@@ -1,6 +1,5 @@
 import { memoMany } from '@frp-ts/utils'
 import {
-  identity,
   isPropertyKey,
   isRecord,
   memoS,
@@ -76,19 +75,6 @@ export type InjectableDependencies<Target> = Merge<
 
 type MapInjectablesToValues<Targets> = {
   readonly [Index in keyof Targets]: InjectableValue<Targets[Index]>
-}
-
-type MergeDependencies<
-  Inputs extends readonly Injectable<UnknownDependencyTree, unknown>[],
-  Name extends PropertyKey | never,
-  Type
-> = {
-  readonly name: Name
-  readonly type: Type
-  readonly optional: Name extends never ? false : true
-  readonly children: {
-    readonly [Index in keyof Inputs]: InjectableDependencyTree<Inputs[Index]>
-  }
 }
 
 export function injectable<
@@ -186,11 +172,12 @@ export function injectable<
   ...args: [...Inputs, (...values: MapInjectablesToValues<Inputs>) => Value]
 ): InjectableWithName<
   {
-    readonly [Key in keyof MergeDependencies<
-      Inputs,
-      Name,
-      Value
-    >]: MergeDependencies<Inputs, Name, Value>[Key]
+    readonly name: Name
+    readonly type: Value
+    readonly optional: true
+    readonly children: {
+      readonly [Index in keyof Inputs]: InjectableDependencyTree<Inputs[Index]>
+    }
   },
   Value
 >
@@ -201,11 +188,12 @@ export function injectable<
   ...args: [...Inputs, (...values: MapInjectablesToValues<Inputs>) => Value]
 ): InjectableWithoutName<
   {
-    readonly [Key in keyof MergeDependencies<
-      Inputs,
-      never,
-      Value
-    >]: MergeDependencies<Inputs, never, Value>[Key]
+    readonly name: never
+    readonly type: Value
+    readonly optional: false
+    readonly children: {
+      readonly [Index in keyof Inputs]: InjectableDependencyTree<Inputs[Index]>
+    }
   },
   Value
 >
