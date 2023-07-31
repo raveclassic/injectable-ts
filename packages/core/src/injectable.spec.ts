@@ -7,6 +7,68 @@ import {
 import { token, TOKEN_ACCESSOR_KEY } from './token'
 
 describe('injectable', () => {
+  describe('overloadings', () => {
+    it('name, project', () => {
+      const result = injectable('foo', () => 123)
+      type Result = typeof result
+      // $ExpectType number
+      type Value = InjectableValue<Result>
+      // $ExpectType "foo"
+      type Dependencies = keyof InjectableDependencies<Result>
+    })
+    it('project', () => {
+      const result = injectable(() => 123)
+      type Result = typeof result
+      // $ExpectType number
+      type Value = InjectableValue<Result>
+      // $ExpectType never
+      type Dependencies = keyof InjectableDependencies<Result>
+    })
+    it('name, list, project', () => {
+      const result = injectable('foo', token('t')<'t'>(), (t) => 123)
+      type Result = typeof result
+      // $ExpectType number
+      type Value = InjectableValue<Result>
+      // $ExpectType "foo" | "t"
+      type Dependencies = Exclude<
+        keyof InjectableDependencies<Result>,
+        typeof TOKEN_ACCESSOR_KEY
+      >
+    })
+    it('name, record, project', () => {
+      const result = injectable('foo', { r: token('t')<'t'>() }, (p) => 123)
+      type Result = typeof result
+      // $ExpectType number
+      type Value = InjectableValue<Result>
+      // $ExpectType "foo" | "t"
+      type Dependencies = Exclude<
+        keyof InjectableDependencies<Result>,
+        typeof TOKEN_ACCESSOR_KEY
+      >
+    })
+    it('record, project', () => {
+      const result = injectable({ r: token('t')<'t'>() }, (p) => 123)
+      type Result = typeof result
+      // $ExpectType number
+      type Value = InjectableValue<Result>
+      // $ExpectType "t"
+      type Dependencies = Exclude<
+        keyof InjectableDependencies<Result>,
+        typeof TOKEN_ACCESSOR_KEY
+      >
+    })
+    it('list, project', () => {
+      const result = injectable(token('t')<'t'>(), (t) => 123)
+      type Result = typeof result
+      // $ExpectType number
+      type Value = InjectableValue<Result>
+      // $ExpectType "t"
+      type Dependencies = Exclude<
+        keyof InjectableDependencies<Result>,
+        typeof TOKEN_ACCESSOR_KEY
+      >
+    })
+  })
   describe('record', () => {
     it('passes values of dependencies to projection function', () => {
       injectable(
