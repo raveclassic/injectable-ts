@@ -11,3 +11,5 @@ export type UnionToIntersection<U> = (
 ) extends (k: infer I) => void
   ? I
   : never
+
+export const identity = <T>(input: T): T => input

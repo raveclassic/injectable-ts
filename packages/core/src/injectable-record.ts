@@ -1,15 +1,15 @@
 import {
   Injectable,
-  InjectableDependencies,
   InjectableDependencyTree,
   InjectableValue,
   InjectableWithName,
   InjectableWithoutName,
+  isPropertyKey,
   UnknownDependencyTree,
 } from './injectable'
-import { token } from './token'
+import { identity } from './utils'
 
-export declare function injectableRecord<
+export function injectableRecord<
   Name extends PropertyKey,
   Inputs extends Record<PropertyKey, Injectable<UnknownDependencyTree, unknown>>
 >(
@@ -30,7 +30,7 @@ export declare function injectableRecord<
     readonly [Key in keyof Inputs]: InjectableValue<Inputs[Key]>
   }
 >
-export declare function injectableRecord<
+export function injectableRecord<
   Inputs extends Record<PropertyKey, Injectable<UnknownDependencyTree, unknown>>
 >(
   inputs: Inputs
@@ -49,7 +49,7 @@ export declare function injectableRecord<
     readonly [Key in keyof Inputs]: InjectableValue<Inputs[Key]>
   }
 >
-export declare function injectableRecord<
+export function injectableRecord<
   Name extends PropertyKey,
   Inputs extends Record<
     PropertyKey,
@@ -73,7 +73,7 @@ export declare function injectableRecord<
   },
   Result
 >
-export declare function injectableRecord<
+export function injectableRecord<
   Inputs extends Record<
     PropertyKey,
     Injectable<UnknownDependencyTree, unknown>
@@ -95,3 +95,42 @@ export declare function injectableRecord<
   },
   Result
 >
+export function injectableRecord(
+  ...args: readonly unknown[]
+): InjectableWithoutName<UnknownDependencyTree, unknown> {
+  let name: PropertyKey | undefined
+  let inputs:
+    | Record<PropertyKey, Injectable<UnknownDependencyTree, unknown>>
+    | undefined
+  let project: ((values: Record<PropertyKey, unknown>) => unknown) | undefined
+
+  if (args.length === 1) {
+    // const foo = token('foo')<string>()
+    // injectable({ foo })
+    // eslint-disable-next-line no-restricted-syntax
+    inputs = args[0] as never
+    project = identity
+  } else if (args.length === 2) {
+    if (isPropertyKey(args[0])) {
+      // injectable('name', { foo })
+      // eslint-disable-next-line no-restricted-syntax
+      name = args[0] as never
+      // eslint-disable-next-line no-restricted-syntax
+      inputs = args[1] as never
+    } else {
+      // injectable({ foo }, p => p.foo)
+      // eslint-disable-next-line no-restricted-syntax
+      inputs = args[0] as never
+      // eslint-disable-next-line no-restricted-syntax
+      project = args[1] as never
+    }
+  } else if (args.length === 3) {
+    // injectable('name', { foo }, p => p.foo)
+    // eslint-disable-next-line no-restricted-syntax
+    name = args[0] as never
+    // eslint-disable-next-line no-restricted-syntax
+    inputs = args[1] as never
+    // eslint-disable-next-line no-restricted-syntax
+    project = args[2] as never
+  }
+}
