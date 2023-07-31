@@ -16,7 +16,10 @@ describe('injectable', () => {
           a,
           // $ExpectType "b"
           b,
-        }) => {}
+        }) => {
+          expect(a).toEqual('a')
+          expect(b).toEqual('b')
+        }
       )
     })
     it('returns result of projection function when called and memorizes it', () => {
@@ -109,7 +112,10 @@ describe('injectable', () => {
           a,
           // $ExpectType "b"
           b
-        ) => {}
+        ) => {
+          expect(a).toEqual('a')
+          expect(b).toEqual('b')
+        }
       )
     })
     it('returns result of projection function when called and memorizes it', () => {
