@@ -2,7 +2,6 @@ import { memoMany } from '@frp-ts/utils'
 import {
   isPropertyKey,
   isRecord,
-  memoS,
   Merge,
   NoInfer,
   UnionToIntersection,
@@ -223,66 +222,96 @@ export function injectable<
 export function injectable(
   ...args: readonly unknown[]
 ): Injectable<UnknownDependencyTree, unknown> {
-  const [arg0, arg1, arg2] = args
+  return isRecord(args[0]) || (isPropertyKey(args[0]) && isRecord(args[1]))
+    ? createRecordInjectable(args)
+    : createListInjectable(args)
+}
 
-  const name = isPropertyKey(arg0) ? arg0 : undefined
-
-  if (isRecord(arg0) || (isPropertyKey(arg0) && isRecord(arg1))) {
-    let injectables: Record<
-      PropertyKey,
-      Injectable<UnknownDependencyTree, unknown>
-    >
-    let project: (values: Record<PropertyKey, unknown>) => unknown
-    if (isRecord(arg0)) {
-      // eslint-disable-next-line no-restricted-syntax
-      injectables = arg0 as never
-      // eslint-disable-next-line no-restricted-syntax
-      project = memoS(arg1 as never)
-    } else {
-      // eslint-disable-next-line no-restricted-syntax
-      injectables = arg1 as never
-      // eslint-disable-next-line no-restricted-syntax
-      project = memoS(arg2 as never)
-    }
-
-    const f = (dependencies: Record<PropertyKey, unknown>): unknown => {
-      if (name !== undefined) {
-        const override = dependencies[name]
-        if (override !== undefined) {
-          return override
-        }
-      }
-      const values: Record<PropertyKey, unknown> = {}
-      for (const [name, injectable] of Object.entries(injectables)) {
-        values[name] = injectable(dependencies)
-      }
-      return project(values)
-    }
-    f.key = name
-
-    return f
-  } else {
-    const injectables: readonly Injectable<UnknownDependencyTree, unknown>[] =
-      // eslint-disable-next-line no-restricted-syntax
-      args.slice(name !== undefined ? 1 : 0, args.length - 1) as never
+function createRecordInjectable(
+  args: readonly unknown[]
+): Injectable<UnknownDependencyTree, unknown> {
+  const name = isPropertyKey(args[0]) ? args[0] : undefined
+  let injectables: Record<
+    PropertyKey,
+    Injectable<UnknownDependencyTree, unknown>
+  >
+  let project: (values: Record<PropertyKey, unknown>) => unknown
+  if (isRecord(args[0])) {
     // eslint-disable-next-line no-restricted-syntax
-    const project: (...values: readonly unknown[]) => unknown = args[
-      args.length - 1
-    ] as never
+    injectables = args[0] as never
+    // eslint-disable-next-line no-restricted-syntax
+    project = args[1] as never
+  } else {
+    // eslint-disable-next-line no-restricted-syntax
+    injectables = args[1] as never
+    // eslint-disable-next-line no-restricted-syntax
+    project = args[2] as never
+  }
 
-    const memoizedProject = memoMany(project)
-    const f = (dependencies: Record<PropertyKey, unknown>): unknown => {
-      if (name !== undefined) {
-        const override = dependencies[name]
-        if (override !== undefined) {
-          return override
+  let cachedResult: unknown
+  let cachedArg: Record<PropertyKey, unknown>
+  let hasValue = false
+  const keys = Object.keys(injectables)
+  const update = (arg: Record<PropertyKey, unknown>): void => {
+    cachedResult = project(arg)
+    hasValue = true
+    cachedArg = arg
+  }
+  const f = (dependencies: Record<PropertyKey, unknown>): unknown => {
+    if (name !== undefined) {
+      const override = dependencies[name]
+      if (override !== undefined) {
+        return override
+      }
+    }
+    const values: Record<PropertyKey, unknown> = {}
+    for (const key of keys) {
+      values[key] = injectables[key](dependencies)
+    }
+
+    if (hasValue) {
+      for (const key of keys) {
+        if (cachedArg[key] !== values[key]) {
+          update(values)
+          return cachedResult
         }
       }
-      const values = injectables.map((injectable) => injectable(dependencies))
-      return memoizedProject(...values)
-    }
-    f.key = name
 
-    return f
+      return cachedResult
+    } else {
+      update(values)
+      return cachedResult
+    }
   }
+  f.key = name
+
+  return f
+}
+
+function createListInjectable(
+  args: readonly unknown[]
+): Injectable<UnknownDependencyTree, unknown> {
+  const name = isPropertyKey(args[0]) ? args[0] : undefined
+  const injectables: readonly Injectable<UnknownDependencyTree, unknown>[] =
+    // eslint-disable-next-line no-restricted-syntax
+    args.slice(name !== undefined ? 1 : 0, args.length - 1) as never
+  // eslint-disable-next-line no-restricted-syntax
+  const project: (...values: readonly unknown[]) => unknown = args[
+    args.length - 1
+  ] as never
+
+  const memoizedProject = memoMany(project)
+  const f = (dependencies: Record<PropertyKey, unknown>): unknown => {
+    if (name !== undefined) {
+      const override = dependencies[name]
+      if (override !== undefined) {
+        return override
+      }
+    }
+    const values = injectables.map((injectable) => injectable(dependencies))
+    return memoizedProject(...values)
+  }
+  f.key = name
+
+  return f
 }

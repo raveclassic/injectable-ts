@@ -100,6 +100,19 @@ describe('injectable', () => {
       expect(c({ a: 'a', b: 'b' })).toBe('test a b')
       expect(project).toHaveBeenCalledTimes(1)
     })
+    it('re-runs projection function if one of its dependencies changes', () => {
+      const project = jest.fn(
+        ({ a, b }: { a: string; b: string }) => `test ${a} ${b}`
+      )
+      const c = injectable(
+        { a: token('a')<string>(), b: token('b')<string>() },
+        project
+      )
+      const result = c({ a: 'a', b: 'b' })
+      expect(result).toBe('test a b')
+      expect(c({ a: 'a', b: 'c' })).toBe('test a c')
+      expect(project).toHaveBeenCalledTimes(2)
+    })
     it('forwards dependencies of dependencies', () => {
       const d = token('d')<'d'>()
       const e = token('e')<'e'>()
@@ -190,6 +203,14 @@ describe('injectable', () => {
       expect(result).toBe('test a b')
       expect(c({ a: 'a', b: 'b' })).toBe('test a b')
       expect(project).toHaveBeenCalledTimes(1)
+    })
+    it('re-runs projection function if one of its dependencies changes', () => {
+      const project = jest.fn((a: string, b: string) => `test ${a} ${b}`)
+      const c = injectable(token('a')<string>(), token('b')<string>(), project)
+      const result = c({ a: 'a', b: 'b' })
+      expect(result).toBe('test a b')
+      expect(c({ a: 'a', b: 'c' })).toBe('test a c')
+      expect(project).toHaveBeenCalledTimes(2)
     })
     it('forwards dependencies of dependencies', () => {
       const d = token('d')<'d'>()
