@@ -11,3 +11,20 @@ export type UnionToIntersection<U> = (
 ) extends (k: infer I) => void
   ? I
   : never
+
+export const isRecord = (
+  input: unknown
+): input is Record<PropertyKey, unknown> =>
+  typeof input === 'object' &&
+  input !== null &&
+  !Array.isArray(input) &&
+  !(input instanceof Date) &&
+  !(input instanceof Map) &&
+  !(input instanceof Set) &&
+  !(input instanceof WeakSet) &&
+  !(input instanceof WeakMap)
+
+export const isPropertyKey = (input: unknown): input is PropertyKey =>
+  typeof input === 'string' ||
+  typeof input === 'number' ||
+  typeof input === 'symbol'
