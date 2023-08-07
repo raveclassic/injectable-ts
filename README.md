@@ -37,7 +37,6 @@ So, the goals of this project are to:
 The project is split into several packages, and you can find documentation for them in the corresponding readme files.
 
 - [@injectable-ts/core](./packages/core/README.md) - the main package containing building blocks for the IoC/DI
-- [@injectable-ts/fp-ts](./packages/fp-ts/README.md) - bindings for [fp-ts](https://github.com/gcanti/fp-ts/) library
 - [@injectable-ts/react](./packages/react/README.md) - bindings for React for better integration with the core
 - more coming soon
 

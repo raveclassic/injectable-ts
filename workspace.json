@@ -2,7 +2,6 @@
   "version": 2,
   "projects": {
     "core": "packages/core",
-    "fp-ts": "packages/fp-ts",
     "react": "packages/react"
   },
   "$schema": "./node_modules/nx/schemas/workspace-schema.json"
