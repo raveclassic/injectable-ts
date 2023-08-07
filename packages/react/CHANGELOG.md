@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.5](https://github.com/raveclassic/injectable-ts/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2023-08-07)
+
+
+### Performance Improvements
+
+* **react:** remove unnecessary memo ([c453f13](https://github.com/raveclassic/injectable-ts/commit/c453f1370ad64edf6f7b51791c7c87c38f2b367a))
+
+
+
+
+
 # [1.0.0-alpha.4](https://github.com/raveclassic/injectable-ts/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2023-05-11)
 
 **Note:** Version bump only for package @injectable-ts/react

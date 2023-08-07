@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.5](https://github.com/raveclassic/injectable-ts/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2023-08-07)
+
+
+### Build System
+
+* **fp-ts:** stop package support ([abf5844](https://github.com/raveclassic/injectable-ts/commit/abf5844e482392a383d1a1f6dc386c376799e814))
+
+
+### Features
+
+* **core:** injectable records ([#16](https://github.com/raveclassic/injectable-ts/issues/16)) ([1db5d34](https://github.com/raveclassic/injectable-ts/commit/1db5d346c9261bf4474828ab59de65978be3c8f5))
+
+
+### Performance Improvements
+
+* **react:** remove unnecessary memo ([c453f13](https://github.com/raveclassic/injectable-ts/commit/c453f1370ad64edf6f7b51791c7c87c38f2b367a))
+
+
+### BREAKING CHANGES
+
+* **fp-ts:** package is stopped
+
+
+
+
+
 # [1.0.0-alpha.4](https://github.com/raveclassic/injectable-ts/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2023-05-11)
 
 **Note:** Version bump only for package injectable-ts
