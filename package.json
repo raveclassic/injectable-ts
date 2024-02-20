@@ -27,12 +27,6 @@
     "@commitlint/cli": "^16.2.3",
     "@commitlint/config-angular": "^16.2.3",
     "@commitlint/config-conventional": "^16.2.1",
-    "@nrwl/cli": "15.3.3",
-    "@nrwl/eslint-plugin-nx": "18.0.4",
-    "@nrwl/jest": "18.0.4",
-    "@nrwl/js": "18.0.4",
-    "@nrwl/linter": "18.0.4",
-    "@nrwl/workspace": "18.0.4",
     "@testing-library/react": "^13.4.0",
     "@types/jest": "29.4.4",
     "@types/node": "18.19.17",
@@ -53,7 +47,12 @@
     "prettier": "2.8.1",
     "ts-jest": "29.1.2",
     "ts-node": "10.9.1",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "@nx/workspace": "18.0.4",
+    "@nx/js": "18.0.4",
+    "@nx/eslint": "18.0.4",
+    "@nx/eslint-plugin": "18.0.4",
+    "@nx/jest": "18.0.4"
   },
   "husky": {
     "hooks": {
@@ -61,4 +60,3 @@
     }
   }
 }
-
