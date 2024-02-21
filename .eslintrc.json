@@ -1,17 +1,12 @@
 {
   "root": true,
   "ignorePatterns": ["**/*"],
-  "plugins": [
-    "jest",
-    "import",
-    "unicorn",
-    "@nrwl/nx"
-  ],
+  "plugins": ["jest", "import", "unicorn", "@nx"],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
-        "@nrwl/nx/enforce-module-boundaries": [
+        "@nx/enforce-module-boundaries": [
           "error",
           {
             "enforceBuildableLibDependency": true,
@@ -29,7 +24,7 @@
     {
       "files": ["*.ts", "*.tsx"],
       "extends": [
-        "plugin:@nrwl/nx/typescript",
+        "plugin:@nx/typescript",
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
         "plugin:@typescript-eslint/recommended"
@@ -38,7 +33,10 @@
         "@typescript-eslint/semi": ["error", "never"],
         "@typescript-eslint/no-explicit-any": "error",
         "@typescript-eslint/no-unused-vars": "error",
-        "no-restricted-syntax": ["error", "TSAsExpression[typeAnnotation.typeName.name!='const']"],
+        "no-restricted-syntax": [
+          "error",
+          "TSAsExpression[typeAnnotation.typeName.name!='const']"
+        ],
         "eqeqeq": "error",
         "semi": "off",
         "@typescript-eslint/member-delimiter-style": [
@@ -64,7 +62,10 @@
         "no-mixed-spaces-and-tabs": 0,
         "@typescript-eslint/prefer-readonly": 2,
         "@typescript-eslint/prefer-readonly-parameter-types": 0,
-        "@typescript-eslint/no-empty-function": [2, { "allow": ["arrowFunctions"] }],
+        "@typescript-eslint/no-empty-function": [
+          2,
+          { "allow": ["arrowFunctions"] }
+        ],
         "@typescript-eslint/no-empty-interface": 0,
         "@typescript-eslint/no-non-null-assertion": 2,
         "no-warning-comments": [2, { "terms": ["@todo"] }],
@@ -131,7 +132,7 @@
     },
     {
       "files": ["*.js", "*.jsx"],
-      "extends": ["plugin:@nrwl/nx/javascript"],
+      "extends": ["plugin:@nx/javascript"],
       "rules": {}
     },
     {
@@ -142,14 +143,13 @@
     },
     {
       "files": ["*.spec.ts", "*.spec.tsx"],
-      "plugins": [
-        "expect-type"
-      ],
-      "extends": [
-        "plugin:eslint-plugin-expect-type/recommended"
-      ],
+      "plugins": ["expect-type"],
+      "extends": ["plugin:eslint-plugin-expect-type/recommended"],
       "rules": {
-        "expect-type/expect": ["error", { "disableExpectTypeSnapshotFix": true}]
+        "expect-type/expect": [
+          "error",
+          { "disableExpectTypeSnapshotFix": true }
+        ]
       }
     }
   ]
