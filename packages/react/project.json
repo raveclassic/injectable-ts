@@ -3,16 +3,6 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/react/src",
   "targets": {
-    "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/packages/react",
-        "main": "packages/react/src/index.ts",
-        "tsConfig": "packages/react/tsconfig.lib.json",
-        "assets": ["packages/react/*.md"]
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]
@@ -31,6 +21,36 @@
       "options": {
         "access": "public",
         "noBuild": true
+      }
+    },
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "main": "packages/react/src/index.ts",
+        "outputPath": "dist/packages/react",
+        "tsConfig": "packages/react/tsconfig.lib.json",
+        "compiler": "tsc",
+        "project": "packages/react/package.json",
+        "format": ["esm", "cjs"],
+        "assets": [
+          {
+            "glob": "packages/react/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ],
+        "deleteOutputPath": true
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
       }
     }
   },

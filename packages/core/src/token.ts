@@ -9,7 +9,9 @@ export interface TokenAccessor {
   ): Dependencies[Name]
 }
 
-export function token<Name extends PropertyKey>(name: Name) {
+/* @__NO_SIDE_EFFECTS__ */ export function token<Name extends PropertyKey>(
+  name: Name
+) {
   return <Type = never>(): InjectableWithName<
     {
       readonly name: Name

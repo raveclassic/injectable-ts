@@ -12,7 +12,7 @@ export type UnionToIntersection<U> = (
   ? I
   : never
 
-export const isRecord = (
+export const isRecord = /* @__NO_SIDE_EFFECTS__ */ (
   input: unknown
 ): input is Record<PropertyKey, unknown> =>
   typeof input === 'object' &&
@@ -24,7 +24,9 @@ export const isRecord = (
   !(input instanceof WeakSet) &&
   !(input instanceof WeakMap)
 
-export const isPropertyKey = (input: unknown): input is PropertyKey =>
+export const isPropertyKey = /* @__NO_SIDE_EFFECTS__ */ (
+  input: unknown
+): input is PropertyKey =>
   typeof input === 'string' ||
   typeof input === 'number' ||
   typeof input === 'symbol'

@@ -7,7 +7,7 @@ import {
 import { useContext, useMemo } from 'react'
 import { context } from './context'
 
-export function useInjectable<
+/* @__NO_SIDE_EFFECTS__ */ export function useInjectable<
   Input extends Injectable<UnknownDependencyTree, unknown>
 >(
   input: Input,

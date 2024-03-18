@@ -9,9 +9,10 @@ const checkedAccessor: TokenAccessor = (dependencies, name) => {
   }
   throw new Error(`Missing dependency: ${JSON.stringify(name)}`)
 }
-export const DependenciesProvider = (
+
+/* @__NO_SIDE_EFFECTS__ */ export function DependenciesProvider(
   props: ProviderProps<UnknownDependencies>
-) => {
+) {
   const previousDependencies = useContext(context)
   const mergedDependencies = useMemo(
     () => ({
@@ -27,4 +28,3 @@ export const DependenciesProvider = (
     </context.Provider>
   )
 }
-DependenciesProvider.displayName = 'DependenciesProvider'

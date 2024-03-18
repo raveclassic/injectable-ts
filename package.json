@@ -7,8 +7,8 @@
     "./packages/*"
   ],
   "engines": {
-    "node": "^16.16.0",
-    "npm": "^8.11.0"
+    "node": ">=16.16.0",
+    "npm": ">=8.11.0"
   },
   "scripts": {
     "build": "nx run-many --target=build --all --parallel",
@@ -21,12 +21,18 @@
     "deploy": "nx run-many --target=deploy --all"
   },
   "dependencies": {
-    "tslib": "^2.0.0"
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^16.2.3",
     "@commitlint/config-angular": "^16.2.3",
     "@commitlint/config-conventional": "^16.2.1",
+    "@nx/eslint": "18.0.4",
+    "@nx/eslint-plugin": "18.0.4",
+    "@nx/jest": "18.0.4",
+    "@nx/js": "18.0.4",
+    "@nx/rollup": "18.0.4",
+    "@nx/workspace": "18.0.4",
     "@testing-library/react": "^13.4.0",
     "@types/jest": "29.4.4",
     "@types/node": "18.19.17",
@@ -47,12 +53,7 @@
     "prettier": "2.8.1",
     "ts-jest": "29.1.2",
     "ts-node": "10.9.1",
-    "typescript": "5.3.3",
-    "@nx/workspace": "18.0.4",
-    "@nx/js": "18.0.4",
-    "@nx/eslint": "18.0.4",
-    "@nx/eslint-plugin": "18.0.4",
-    "@nx/jest": "18.0.4"
+    "typescript": "5.3.3"
   },
   "husky": {
     "hooks": {
