@@ -5,35 +5,33 @@
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
-        "project": "packages/core/package.json",
-        "deleteOutputPath": true,
         "main": "packages/core/src/index.ts",
-        "format": ["cjs", "esm"],
-        "compiler": "tsc",
-        "generateExportsField": true,
+        "outputPath": "dist/packages/core",
         "tsConfig": "packages/core/tsconfig.lib.json",
-        "outputPath": "dist/packages/core"
-      }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
-    },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/packages/core"],
-      "options": {
-        "jestConfig": "packages/core/jest.config.ts",
-        "passWithNoTests": false,
-        "codeCoverage": true
-      }
-    },
-    "deploy": {
-      "executor": "ngx-deploy-npm:deploy",
-      "options": {
-        "access": "public",
-        "noBuild": true
+        "compiler": "tsc",
+        "project": "packages/core/package.json",
+        "format": ["esm", "cjs"],
+        "assets": [
+          {
+            "glob": "packages/core/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ],
+        "deleteOutputPath": true,
+        "generateExportsField": true
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "sourceMap": true,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
       }
     }
   },
