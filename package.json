@@ -14,8 +14,8 @@
     "build": "nx run-many --target=build --all --parallel",
     "lint": "nx run-many --target=lint --all --parallel",
     "test": "nx run-many --target=test --all --parallel",
-    "preversion": "npm i --frozen-lockfile",
-    "version": "npm i && git add package-lock.json",
+    "preversion": "pnpm i --frozen-lockfile",
+    "version": "pnpm i && git add pnpm-workspace.yaml",
     "postversion": "git push",
     "predeploy": "npm run build",
     "deploy": "nx run-many --target=deploy --all"
