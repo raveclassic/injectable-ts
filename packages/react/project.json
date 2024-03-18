@@ -4,13 +4,17 @@
   "sourceRoot": "packages/react/src",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
       "options": {
-        "outputPath": "dist/packages/react",
-        "main": "packages/react/src/index.ts",
-        "tsConfig": "packages/react/tsconfig.lib.json",
-        "assets": ["packages/react/*.md"]
+        "cwd": "packages/react",
+        "commands": [
+          "rm -rf ../../dist/packages/react",
+          "tsc --project tsconfig.lib.json --outDir ../../dist/packages/react/dist/cjs --rootDir src --declaration false",
+          "tsc --project tsconfig.lib.json --outDir ../../dist/packages/react/dist/esm --rootDir src --module esnext --declaration false",
+          "tsc --project tsconfig.lib.json --outDir ../../dist/packages/react/dist/types --rootDir src --module esnext --emitDeclarationOnly true",
+          "cp README.md package.json ../../dist/packages/react"
+        ],
+        "parallel": false
       }
     },
     "lint": {
