@@ -1,11 +1,7 @@
 {
   "name": "@injectable-ts/core",
   "version": "1.0.0-alpha.5",
-  "type": "module",
   "sideEffects": false,
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/types/index.d.ts",
   "dependencies": {
     "@frp-ts/utils": "^1.0.0-beta.3"
   }

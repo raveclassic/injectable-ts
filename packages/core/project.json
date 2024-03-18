@@ -4,17 +4,16 @@
   "sourceRoot": "packages/core/src",
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/rollup:rollup",
       "options": {
-        "cwd": "packages/core",
-        "commands": [
-          "rm -rf ../../dist/packages/core",
-          "tsc --project tsconfig.lib.json --outDir ../../dist/packages/core/dist/cjs --rootDir src --declaration false",
-          "tsc --project tsconfig.lib.json --outDir ../../dist/packages/core/dist/esm --rootDir src --module esnext --declaration false",
-          "tsc --project tsconfig.lib.json --outDir ../../dist/packages/core/dist/types --rootDir src --module esnext --emitDeclarationOnly true",
-          "cp README.md package.json ../../dist/packages/core"
-        ],
-        "parallel": false
+        "project": "packages/core/package.json",
+        "deleteOutputPath": true,
+        "main": "packages/core/src/index.ts",
+        "format": ["cjs", "esm"],
+        "compiler": "tsc",
+        "generateExportsField": true,
+        "tsConfig": "packages/core/tsconfig.lib.json",
+        "outputPath": "dist/packages/core"
       }
     },
     "lint": {

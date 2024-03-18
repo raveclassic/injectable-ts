@@ -31,6 +31,7 @@
     "@nx/eslint-plugin": "18.0.4",
     "@nx/jest": "18.0.4",
     "@nx/js": "18.0.4",
+    "@nx/rollup": "18.0.4",
     "@nx/workspace": "18.0.4",
     "@testing-library/react": "^13.4.0",
     "@types/jest": "29.4.4",
