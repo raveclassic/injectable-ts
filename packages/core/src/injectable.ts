@@ -219,6 +219,7 @@ export function injectable<
   },
   Value
 >
+/* @__NO_SIDE_EFFECTS__ */
 export function injectable(
   ...args: readonly unknown[]
 ): Injectable<UnknownDependencyTree, unknown> {

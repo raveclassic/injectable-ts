@@ -36,7 +36,7 @@ interface ProvideFn {
     }) => Value
   >
 }
-export const provide: ProvideFn =
+export const provide: ProvideFn = /* @__NO_SIDE_EFFECTS__ */
   (input) => () => (outerDependencies) => (innerDependencies) =>
     // eslint-disable-next-line no-restricted-syntax
     input({ ...outerDependencies, ...innerDependencies } as never)
