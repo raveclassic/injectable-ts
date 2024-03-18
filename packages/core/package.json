@@ -6,6 +6,7 @@
   "module": "index.esm.js",
   "types": "./index.cjs.d.ts",
   "dependencies": {
-    "@frp-ts/utils": "^1.0.0-beta.3"
+    "@frp-ts/utils": "^1.0.0-beta.3",
+    "tslib": "^2.6.2"
   }
 }
