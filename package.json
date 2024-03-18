@@ -17,7 +17,6 @@
     "preversion": "pnpm i --frozen-lockfile",
     "version": "pnpm i && git add pnpm-lock.yaml",
     "postversion": "git push",
-    "predeploy": "npm run build",
     "deploy": "nx run-many --target=deploy --all"
   },
   "devDependencies": {

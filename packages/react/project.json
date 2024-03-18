@@ -2,6 +2,7 @@
   "name": "react",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/react/src",
+  "projectType": "library",
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint",
@@ -19,9 +20,11 @@
     "deploy": {
       "executor": "ngx-deploy-npm:deploy",
       "options": {
+        "distFolderPath": "dist/packages/react",
         "access": "public",
         "noBuild": true
-      }
+      },
+      "dependsOn": ["build"]
     },
     "build": {
       "executor": "@nx/rollup:rollup",

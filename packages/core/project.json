@@ -2,6 +2,7 @@
   "name": "core",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/core/src",
+  "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
@@ -49,9 +50,11 @@
     "deploy": {
       "executor": "ngx-deploy-npm:deploy",
       "options": {
+        "distFolderPath": "dist/packages/core",
         "access": "public",
         "noBuild": true
-      }
+      },
+      "dependsOn": ["build"]
     }
   },
   "tags": []
