@@ -3,20 +3,6 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/react/src",
   "targets": {
-    "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "packages/react",
-        "commands": [
-          "rm -rf ../../dist/packages/react",
-          "tsc --project tsconfig.lib.json --outDir ../../dist/packages/react/dist/cjs --rootDir src --declaration false",
-          "tsc --project tsconfig.lib.json --outDir ../../dist/packages/react/dist/esm --rootDir src --module esnext --declaration false",
-          "tsc --project tsconfig.lib.json --outDir ../../dist/packages/react/dist/types --rootDir src --module esnext --emitDeclarationOnly true",
-          "cp README.md package.json ../../dist/packages/react"
-        ],
-        "parallel": false
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]
@@ -35,6 +21,36 @@
       "options": {
         "access": "public",
         "noBuild": true
+      }
+    },
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "main": "packages/react/src/index.ts",
+        "outputPath": "dist/packages/react",
+        "tsConfig": "packages/react/tsconfig.lib.json",
+        "compiler": "tsc",
+        "project": "packages/react/package.json",
+        "format": ["esm", "cjs"],
+        "assets": [
+          {
+            "glob": "packages/react/README.md",
+            "input": ".",
+            "output": "."
+          }
+        ],
+        "deleteOutputPath": true
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "sourceMap": false,
+          "namedChunks": false,
+          "extractLicenses": true,
+          "vendorChunk": false
+        }
       }
     }
   },

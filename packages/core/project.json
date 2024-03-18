@@ -21,8 +21,7 @@
             "output": "."
           }
         ],
-        "deleteOutputPath": true,
-        "generateExportsField": true
+        "deleteOutputPath": true
       },
       "configurations": {
         "production": {
