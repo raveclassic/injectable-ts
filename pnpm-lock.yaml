@@ -86,7 +86,7 @@ importers:
 
   packages/react:
     specifiers:
-      '@injectable-ts/core': ^1.0.0-beta.0
+      '@injectable-ts/core': ^1.0.0-alpha.5
     dependencies:
       '@injectable-ts/core': link:../core
 
