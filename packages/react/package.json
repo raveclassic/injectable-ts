@@ -2,17 +2,13 @@
   "name": "@injectable-ts/react",
   "version": "1.0.0-alpha.5",
   "sideEffects": false,
-  "main": "index.cjs.js",
-  "module": "index.esm.js",
+  "main": "./index.cjs.js",
+  "module": "./index.esm.js",
   "types": "./index.cjs.d.ts",
   "dependencies": {
-    "@injectable-ts/core": "^1.0.0-alpha.5"
-  },
-  "devDependencies": {
-    "@types/react": ">=17.0.0",
-    "react": ">=17.0.0"
+    "@injectable-ts/core": "^1.0.0-beta.0"
   },
   "peerDependencies": {
-    "react": ">=17.0.0"
+    "react": "^18.2.0"
   }
 }

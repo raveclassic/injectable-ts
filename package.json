@@ -35,6 +35,7 @@
     "@testing-library/react": "^13.4.0",
     "@types/jest": "29.4.4",
     "@types/node": "18.19.17",
+    "@types/react": "^18.2.67",
     "@typescript-eslint/eslint-plugin": "6.21.0",
     "@typescript-eslint/parser": "6.21.0",
     "eslint": "^8.56.0",
