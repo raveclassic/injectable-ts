@@ -36,8 +36,8 @@ So, the goals of this project are to:
 
 The project is split into several packages, and you can find documentation for them in the corresponding readme files.
 
-- [@injectable-ts/core](./packages/core/README.md) - the main package containing building blocks for the IoC/DI
-- [@injectable-ts/react](./packages/react/README.md) - bindings for React for better integration with the core
+- [@injectable-ts/core](./packages/core/README.md) - the main package containing building blocks for the IoC/DI [(see docs)](./packages/core/README.md)
+- [@injectable-ts/react](./packages/react/README.md) - bindings for React for better integration with the core [(see docs)](./packages/react/README.md)
 - more coming soon
 
 ## Changelog
