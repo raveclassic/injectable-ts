@@ -32,6 +32,26 @@
           "vendorChunk": false
         }
       }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/packages/core"],
+      "options": {
+        "jestConfig": "packages/core/jest.config.ts",
+        "passWithNoTests": false,
+        "codeCoverage": true
+      }
+    },
+    "deploy": {
+      "executor": "ngx-deploy-npm:deploy",
+      "options": {
+        "access": "public",
+        "noBuild": true
+      }
     }
   },
   "tags": []
