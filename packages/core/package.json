@@ -1,6 +1,6 @@
 {
   "name": "@injectable-ts/core",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-beta.0",
   "sideEffects": false,
   "main": "./index.cjs.js",
   "module": "./index.esm.js",

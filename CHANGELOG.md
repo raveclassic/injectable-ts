@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-beta.0](https://github.com/raveclassic/injectable-ts/compare/v1.0.0-alpha.5...v1.0.0-beta.0) (2024-03-18)
+
+
+### Build System
+
+* update react ([eab2fa5](https://github.com/raveclassic/injectable-ts/commit/eab2fa559433ca33f42b1706319b8fd92ca16843))
+
+
+### BREAKING CHANGES
+
+* minimum react version is 18.2.0
+
+
+
+
+
 # [1.0.0-alpha.5](https://github.com/raveclassic/injectable-ts/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2023-08-07)
 
 
