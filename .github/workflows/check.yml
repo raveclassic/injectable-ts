@@ -1,0 +1,62 @@
+name: '[event] On pull request'
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  pull-request:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # needed for nx affected
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.15.5
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.17.1
+
+      - name: Set env
+        shell: sh
+        run: |
+          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          echo "PNPM_LOCK_HASH=${{ hashFiles('pnpm-lock.yaml') }}" >> $GITHUB_ENV
+          echo "PNPM_VERSION=$(pnpm -v)" >> $GITHUB_ENV
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          # primary cache is based on pnpm-lock.yaml
+          key: pnpm-${{ env.PNPM_VERSION }}-${{ env.PNPM_LOCK_HASH }}
+          # if primary cache is not found, then use any other cache available
+          # it doesn't matter if it's incomplete, at least some packages will be cached
+          restore-keys: pnpm-${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        shell: sh
+        run: pnpm i --frozen-lockfile
+
+      - run: pnpm commitlint --from HEAD~${{ github.event.pull_request.commits }} --to HEAD --verbose
+
+      - name: Configure NX
+        uses: nrwl/nx-set-shas@v2.2.5
+
+      - name: Build
+        run: pnpm nx affected --target=lint --parallel
+
+      - name: Lint
+        run: pnpm nx affected --target=lint --parallel
+
+      - name: Test
+        run: pnpm nx affected --target=test --parallel
