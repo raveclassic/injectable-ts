@@ -4,7 +4,7 @@ type OmitInChildren<Children extends readonly UnknownDependencyTree[], Keys> = {
   readonly [Index in keyof Children]: OmitDependencies<Children[Index], Keys>
 }
 
-type Step<Tree extends UnknownDependencyTree, Keys> = {
+export type Step<Tree extends UnknownDependencyTree, Keys> = {
   readonly type: Tree['type']
   readonly name: Tree['name']
   readonly optional: Tree['optional']
