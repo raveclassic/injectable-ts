@@ -126,7 +126,7 @@ importers:
   packages/react:
     dependencies:
       '@injectable-ts/core':
-        specifier: ^1.0.0-beta.0
+        specifier: ^1.0.0-beta.1
         version: link:../core
       react:
         specifier: ^18.2.0

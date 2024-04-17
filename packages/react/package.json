@@ -1,12 +1,12 @@
 {
   "name": "@injectable-ts/react",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-beta.1",
   "sideEffects": false,
   "main": "./index.cjs.js",
   "module": "./index.esm.js",
   "types": "./index.cjs.d.ts",
   "dependencies": {
-    "@injectable-ts/core": "^1.0.0-beta.0"
+    "@injectable-ts/core": "^1.0.0-beta.1"
   },
   "peerDependencies": {
     "react": "^18.2.0"
