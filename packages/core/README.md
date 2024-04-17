@@ -121,7 +121,7 @@ const entryPoint = injectable(
   authService,
   movieService,
   logger,
-  (authService, movieService): EntryPoint =>
+  (authService, movieService, logger): EntryPoint =>
     async (login, password): Promise<void> => {
       const token = await authService.authorize(login, password)
       const movies = await movieService.fetchMovies(token)
