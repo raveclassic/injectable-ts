@@ -16,7 +16,7 @@ export interface TokenAccessor {
     {
       readonly name: Name
       readonly type: Type
-      readonly optional: false
+      readonly optional: undefined extends Type ? true : false
       readonly children: readonly [
         {
           readonly name: typeof TOKEN_ACCESSOR_KEY
@@ -37,6 +37,8 @@ export interface TokenAccessor {
       return accessor ? accessor(dependencies, name) : dependencies[name]
     }
     f.key = name
-    return f
+
+    // eslint-disable-next-line no-restricted-syntax
+    return f as never
   }
 }
