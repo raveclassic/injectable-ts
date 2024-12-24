@@ -97,29 +97,27 @@ type MapInjectablesToValues<Targets> = {
 //     readonly [Key in keyof Inputs]: InjectableValue<Inputs[Key]>
 //   }
 // >
+export interface DependencyWithoutName<Result, Children> {
+  readonly name: never
+  readonly type: Result
+  readonly optional: false
+  readonly children: Children
+}
+
+export interface DependencyWithName<Name, Result, Children> {
+  readonly name: Name
+  readonly type: Result
+  readonly optional: true
+  readonly children: Children
+}
+
 export function injectable<Name extends PropertyKey, Result>(
   name: Name,
   project: () => Result
-): InjectableWithName<
-  {
-    readonly name: Name
-    readonly type: Result
-    readonly optional: true
-    readonly children: []
-  },
-  Result
->
+): InjectableWithName<DependencyWithName<Name, Result, []>, Result>
 export function injectable<Result>(
   project: () => Result
-): InjectableWithoutName<
-  {
-    readonly name: never
-    readonly type: Result
-    readonly optional: false
-    readonly children: []
-  },
-  Result
->
+): InjectableWithoutName<DependencyWithoutName<Result, []>, Result>
 export function injectable<
   Inputs extends Record<
     PropertyKey,
@@ -132,14 +130,12 @@ export function injectable<
     readonly [Key in keyof Inputs]: InjectableValue<Inputs[Key]>
   }) => Result
 ): InjectableWithoutName<
-  {
-    readonly name: never
-    readonly type: Result
-    readonly optional: false
-    readonly children: {
+  DependencyWithoutName<
+    Result,
+    {
       [Key in keyof Inputs]: InjectableDependencyTree<Inputs[Key]>
     }[keyof Inputs][]
-  },
+  >,
   Result
 >
 export function injectable<
@@ -156,14 +152,13 @@ export function injectable<
     readonly [Key in keyof Inputs]: InjectableValue<Inputs[Key]>
   }) => Result
 ): InjectableWithName<
-  {
-    readonly name: Name
-    readonly type: Result
-    readonly optional: true
-    readonly children: {
+  DependencyWithName<
+    Name,
+    Result,
+    {
       [Key in keyof Inputs]: InjectableDependencyTree<Inputs[Key]>
     }[keyof Inputs][]
-  },
+  >,
   Result
 >
 // export function injectable<
@@ -188,36 +183,33 @@ export function injectable<
 export function injectable<
   Name extends PropertyKey,
   Inputs extends readonly Injectable<UnknownDependencyTree, unknown>[],
-  Value
+  Result
 >(
   name: Name,
-  ...args: [...Inputs, (...values: MapInjectablesToValues<Inputs>) => Value]
+  ...args: [...Inputs, (...values: MapInjectablesToValues<Inputs>) => Result]
 ): InjectableWithName<
-  {
-    readonly name: Name
-    readonly type: Value
-    readonly optional: true
-    readonly children: {
+  DependencyWithName<
+    Name,
+    Result,
+    {
       readonly [Index in keyof Inputs]: InjectableDependencyTree<Inputs[Index]>
     }
-  },
-  Value
+  >,
+  Result
 >
 export function injectable<
   Inputs extends readonly Injectable<UnknownDependencyTree, unknown>[],
-  Value
+  Result
 >(
-  ...args: [...Inputs, (...values: MapInjectablesToValues<Inputs>) => Value]
+  ...args: [...Inputs, (...values: MapInjectablesToValues<Inputs>) => Result]
 ): InjectableWithoutName<
-  {
-    readonly name: never
-    readonly type: Value
-    readonly optional: false
-    readonly children: {
+  DependencyWithoutName<
+    Result,
+    {
       readonly [Index in keyof Inputs]: InjectableDependencyTree<Inputs[Index]>
     }
-  },
-  Value
+  >,
+  Result
 >
 /* @__NO_SIDE_EFFECTS__ */
 export function injectable(
