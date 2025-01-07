@@ -1,4 +1,4 @@
-import { InjectableWithName } from './injectable'
+import { DependencyWithName, InjectableWithName } from './injectable'
 
 export const TOKEN_ACCESSOR_KEY = '@injectable-ts/core//TOKEN_ACCESSOR'
 
@@ -9,23 +9,20 @@ export interface TokenAccessor {
   ): Dependencies[Name]
 }
 
+export interface TokenInjectable<Name, Type> {
+  readonly name: Name
+  readonly type: Type
+  readonly optional: false
+  readonly children: readonly [
+    DependencyWithName<typeof TOKEN_ACCESSOR_KEY, TokenAccessor, []>
+  ]
+}
+
 /* @__NO_SIDE_EFFECTS__ */ export function token<Name extends PropertyKey>(
   name: Name
 ) {
   return <Type = never>(): InjectableWithName<
-    {
-      readonly name: Name
-      readonly type: Type
-      readonly optional: false
-      readonly children: readonly [
-        {
-          readonly name: typeof TOKEN_ACCESSOR_KEY
-          readonly type: TokenAccessor
-          readonly optional: true
-          readonly children: readonly []
-        }
-      ]
-    },
+    TokenInjectable<Name, Type>,
     Type
   > => {
     const f = (
