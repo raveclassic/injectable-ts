@@ -10,5 +10,23 @@
   },
   "peerDependencies": {
     "react": "^18.2.0"
-  }
+  },
+  "description": "Purely-functional strictly-typed IoC/DI for TypeScript",
+  "author": "raveclassic@gmail.com",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/raveclassic/injectable-ts.git"
+  },
+  "homepage": "https://github.com/raveclassic/injectable-ts#readme",
+  "bugs": {
+    "url": "https://github.com/raveclassic/injectable-ts/issues"
+  },
+  "keywords": [
+    "typescript",
+    "di",
+    "ioc",
+    "dependency injection",
+    "react"
+  ]
 }
