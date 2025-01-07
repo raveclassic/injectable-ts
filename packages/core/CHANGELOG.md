@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-rc.0](https://github.com/raveclassic/injectable-ts/compare/v1.0.0-beta.1...v1.0.0-rc.0) (2025-01-07)
+
+
+### Performance Improvements
+
+* **core:** optimize types to decrease building time ([#25](https://github.com/raveclassic/injectable-ts/issues/25)) ([6e266f2](https://github.com/raveclassic/injectable-ts/commit/6e266f2ad14337fafcfeda5d26344b2b89c75b5a))
+
+
+
+
+
 # [1.0.0-beta.1](https://github.com/raveclassic/injectable-ts/compare/v1.0.0-beta.0...v1.0.0-beta.1) (2024-04-17)
 
 **Note:** Version bump only for package @injectable-ts/core
