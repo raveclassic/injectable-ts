@@ -48,7 +48,7 @@
     "jest": "29.4.3",
     "jest-environment-jsdom": "29.4.3",
     "lerna": "^4.0.0",
-    "ngx-deploy-npm": "^8.0.1",
+    "ngx-deploy-npm": "^9.0.0",
     "nx": "18.0.4",
     "prettier": "2.8.1",
     "react": "^19.2.4",
