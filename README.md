@@ -65,5 +65,5 @@ lerna version <version>
 Then
 
 ```shell
-npm run deploy
+npm run deploy -- --otp<2FA>
 ```
