@@ -2,7 +2,7 @@ import { render } from '@testing-library/react'
 import { useInjectable } from './use-injectable'
 import { injectable, token } from '@injectable-ts/core'
 import React, { StrictMode } from 'react'
-import { suppressConsoleError } from './utils'
+import { suppressConsoleError } from './test-utils'
 import { DependenciesProvider } from './dependencies-provider'
 
 describe('useInjectable', () => {

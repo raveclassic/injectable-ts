@@ -11,4 +11,7 @@ export default {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'html'],
   coverageDirectory: '../../coverage/packages/react',
+  coveragePathIgnorePatterns: [
+    'src/test-utils.ts'
+  ],
 }
