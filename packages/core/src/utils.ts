@@ -1,4 +1,3 @@
-export type NoInfer<T> = T extends infer S ? S : never
 
 export type Merge<Target> = {
   readonly [Key in keyof Target]: Target[Key]

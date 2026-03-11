@@ -3,7 +3,6 @@ import {
   isPropertyKey,
   isRecord,
   Merge,
-  NoInfer,
   UnionToIntersection,
 } from './utils'
 
@@ -12,50 +11,34 @@ export interface UnknownDependencyTree {
   readonly type: unknown
   readonly children: readonly UnknownDependencyTree[]
   readonly optional: boolean
+  /** Pre-computed flattened dependencies — avoids recursive Flatten traversal */
+  readonly flatDeps: Record<PropertyKey, unknown>
 }
 
-type PickRequired<DependencyTree extends UnknownDependencyTree> = {
-  readonly [Name in DependencyTree['name'] as DependencyTree['optional'] extends true
-    ? never
-    : Name]: DependencyTree['type']
-}
-
-type PickOptional<DependencyTree extends UnknownDependencyTree> = {
-  readonly [Name in DependencyTree['name'] as DependencyTree['optional'] extends true
-    ? Name
-    : never]?: DependencyTree['type']
-}
-
-export type Flatten<Tree> = Tree extends UnknownDependencyTree
-  ? PickRequired<Tree> &
-      PickOptional<Tree> &
-      UnionToIntersection<
-        {
-          readonly [Index in keyof Tree['children']]: Flatten<
-            Tree['children'][Index]
-          >
-        }[number]
-      >
+/**
+ * Flatten is now O(1) — it simply extracts the pre-computed flatDeps field.
+ * Previously this was a recursive type that walked the entire dependency tree,
+ * causing exponential type expansion in large codebases.
+ */
+export type Flatten<Tree> = Tree extends { readonly flatDeps: infer F }
+  ? F
   : never
 
-export interface InjectableWithoutName<
-  Tree extends UnknownDependencyTree,
-  Value
-> {
-  (tree: Flatten<NoInfer<Tree>>): Value
+export interface InjectableWithoutName<Tree, Value> {
+  (tree: NoInfer<Flatten<Tree>>): Value
 }
 
-export interface InjectableWithName<Tree extends UnknownDependencyTree, Value> {
-  (tree: Flatten<NoInfer<Tree>>): Value
-  readonly key: Tree['name']
+export interface InjectableWithName<Tree, Value> {
+  (tree: NoInfer<Flatten<Tree>>): Value
+  readonly key: Tree extends { readonly name: infer N } ? N : never
 }
 
-export type Injectable<Tree extends UnknownDependencyTree, Value> =
+export type Injectable<Tree, Value> =
   | InjectableWithoutName<Tree, Value>
   | InjectableWithName<Tree, Value>
 
 export type InjectableValue<Target> = Target extends Injectable<
-  UnknownDependencyTree,
+  infer _Tree,
   infer Value
 >
   ? Value
@@ -76,48 +59,58 @@ type MapInjectablesToValues<Targets> = {
   readonly [Index in keyof Targets]: InjectableValue<Targets[Index]>
 }
 
-// export function injectable<
-//   Name extends PropertyKey,
-//   Inputs extends Record<PropertyKey, Injectable<UnknownDependencyTree, unknown>>
-// >(
-//   name: Name,
-//   inputs: Inputs
-// ): InjectableWithName<
-//   {
-//     readonly name: Name
-//     readonly type: {
-//       readonly [Key in keyof Inputs]: InjectableValue<Inputs[Key]>
-//     }
-//     readonly optional: true
-//     readonly children: {
-//       [Key in keyof Inputs]: InjectableDependencyTree<Inputs[Key]>
-//     }[keyof Inputs][]
-//   },
-//   {
-//     readonly [Key in keyof Inputs]: InjectableValue<Inputs[Key]>
-//   }
-// >
-export interface DependencyWithoutName<Result, Children> {
+export interface DependencyWithoutName<Result, Children, FlatDeps = {}> {
   readonly name: never
   readonly type: Result
   readonly optional: false
   readonly children: Children
+  readonly flatDeps: FlatDeps
 }
 
-export interface DependencyWithName<Name, Result, Children> {
+export interface DependencyWithName<Name, Result, Children, FlatDeps = {}> {
   readonly name: Name
   readonly type: Result
   readonly optional: true
   readonly children: Children
+  readonly flatDeps: FlatDeps
 }
+
+/**
+ * Helper: collects flatDeps from an array/tuple of dependency trees into a single intersection.
+ * Used at injectable creation time to pre-compute the flattened dependencies.
+ */
+type CollectChildFlatDeps<Children> = UnionToIntersection<
+  Children extends readonly (infer Child)[]
+    ? Child extends UnknownDependencyTree
+      ? Child['flatDeps']
+      : never
+    : never
+>
+
+/**
+ * Helper: computes the full flatDeps for a named dependency node.
+ * The node's own name becomes an optional property, merged with children's flatDeps.
+ */
+type NamedFlatDeps<Name extends PropertyKey, Result, Children> = {
+  readonly [K in Name]?: Result
+} & CollectChildFlatDeps<Children>
+
+/**
+ * Helper: computes the full flatDeps for an unnamed dependency node.
+ * Only children's flatDeps are merged.
+ */
+type UnnamedFlatDeps<Children> = CollectChildFlatDeps<Children>
 
 export function injectable<Name extends PropertyKey, Result>(
   name: Name,
   project: () => Result
-): InjectableWithName<DependencyWithName<Name, Result, []>, Result>
+): InjectableWithName<
+  DependencyWithName<Name, Result, [], { readonly [K in Name]?: Result }>,
+  Result
+>
 export function injectable<Result>(
   project: () => Result
-): InjectableWithoutName<DependencyWithoutName<Result, []>, Result>
+): InjectableWithoutName<DependencyWithoutName<Result, [], {}>, Result>
 export function injectable<
   Inputs extends Record<
     PropertyKey,
@@ -134,7 +127,12 @@ export function injectable<
     Result,
     {
       [Key in keyof Inputs]: InjectableDependencyTree<Inputs[Key]>
-    }[keyof Inputs][]
+    }[keyof Inputs][],
+    UnnamedFlatDeps<
+      {
+        [Key in keyof Inputs]: InjectableDependencyTree<Inputs[Key]>
+      }[keyof Inputs][]
+    >
   >,
   Result
 >
@@ -157,29 +155,17 @@ export function injectable<
     Result,
     {
       [Key in keyof Inputs]: InjectableDependencyTree<Inputs[Key]>
-    }[keyof Inputs][]
+    }[keyof Inputs][],
+    NamedFlatDeps<
+      Name,
+      Result,
+      {
+        [Key in keyof Inputs]: InjectableDependencyTree<Inputs[Key]>
+      }[keyof Inputs][]
+    >
   >,
   Result
 >
-// export function injectable<
-//   Inputs extends Record<PropertyKey, Injectable<UnknownDependencyTree, unknown>>
-// >(
-//   inputs: Inputs
-// ): InjectableWithoutName<
-//   {
-//     readonly name: never
-//     readonly type: {
-//       readonly [Key in keyof Inputs]: InjectableValue<Inputs[Key]>
-//     }
-//     readonly optional: false
-//     readonly children: {
-//       [Key in keyof Inputs]: InjectableDependencyTree<Inputs[Key]>
-//     }[keyof Inputs][]
-//   },
-//   {
-//     readonly [Key in keyof Inputs]: InjectableValue<Inputs[Key]>
-//   }
-// >
 export function injectable<
   Name extends PropertyKey,
   Inputs extends readonly Injectable<UnknownDependencyTree, unknown>[],
@@ -193,7 +179,16 @@ export function injectable<
     Result,
     {
       readonly [Index in keyof Inputs]: InjectableDependencyTree<Inputs[Index]>
-    }
+    },
+    NamedFlatDeps<
+      Name,
+      Result,
+      {
+        readonly [Index in keyof Inputs]: InjectableDependencyTree<
+          Inputs[Index]
+        >
+      }
+    >
   >,
   Result
 >
@@ -207,14 +202,22 @@ export function injectable<
     Result,
     {
       readonly [Index in keyof Inputs]: InjectableDependencyTree<Inputs[Index]>
-    }
+    },
+    UnnamedFlatDeps<
+      {
+        readonly [Index in keyof Inputs]: InjectableDependencyTree<
+          Inputs[Index]
+        >
+      }
+    >
   >,
   Result
 >
 /* @__NO_SIDE_EFFECTS__ */
 export function injectable(
   ...args: readonly unknown[]
-): Injectable<UnknownDependencyTree, unknown> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Injectable<any, any> {
   return isRecord(args[0]) || (isPropertyKey(args[0]) && isRecord(args[1]))
     ? createRecordInjectable(args)
     : createListInjectable(args)
@@ -222,7 +225,8 @@ export function injectable(
 
 function createRecordInjectable(
   args: readonly unknown[]
-): Injectable<UnknownDependencyTree, unknown> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Injectable<any, any> {
   const name = isPropertyKey(args[0]) ? args[0] : undefined
   let injectables: Record<
     PropertyKey,
@@ -278,12 +282,14 @@ function createRecordInjectable(
   }
   f.key = name
 
-  return f
+  // eslint-disable-next-line no-restricted-syntax
+  return f as never
 }
 
 function createListInjectable(
   args: readonly unknown[]
-): Injectable<UnknownDependencyTree, unknown> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Injectable<any, any> {
   const name = isPropertyKey(args[0]) ? args[0] : undefined
   const injectables: readonly Injectable<UnknownDependencyTree, unknown>[] =
     // eslint-disable-next-line no-restricted-syntax
@@ -306,5 +312,6 @@ function createListInjectable(
   }
   f.key = name
 
-  return f
+  // eslint-disable-next-line no-restricted-syntax
+  return f as never
 }
