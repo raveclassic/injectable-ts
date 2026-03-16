@@ -14,8 +14,16 @@ export interface TokenInjectable<Name, Type> {
   readonly type: Type
   readonly optional: false
   readonly children: readonly [
-    DependencyWithName<typeof TOKEN_ACCESSOR_KEY, TokenAccessor, []>
+    DependencyWithName<
+      typeof TOKEN_ACCESSOR_KEY,
+      TokenAccessor,
+      [],
+      { readonly [TOKEN_ACCESSOR_KEY]?: TokenAccessor }
+    >
   ]
+  readonly flatDeps: { readonly [K in Name & PropertyKey]: Type } & {
+    readonly [TOKEN_ACCESSOR_KEY]?: TokenAccessor
+  }
 }
 
 /* @__NO_SIDE_EFFECTS__ */ export function token<Name extends PropertyKey>(

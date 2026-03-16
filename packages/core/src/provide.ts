@@ -1,34 +1,22 @@
-import { Flatten, Injectable, UnknownDependencyTree } from './injectable'
+import { Flatten, Injectable } from './injectable'
 
-type OmitInChildren<Children extends readonly UnknownDependencyTree[], Keys> = {
-  readonly [Index in keyof Children]: OmitDependencies<Children[Index], Keys>
+/**
+ * Simplified tree after omitting dependencies.
+ * Instead of recursively walking the tree to remove nodes,
+ * we just store the new flatDeps directly via Omit — O(1) instead of O(tree depth).
+ */
+interface OmittedTree<OriginalTree, Keys> {
+  readonly flatDeps: Omit<
+    OriginalTree extends { readonly flatDeps: infer F } ? F : never,
+    Keys & PropertyKey
+  >
 }
-
-export type Step<Tree extends UnknownDependencyTree, Keys> = {
-  readonly type: Tree['type']
-  readonly name: Tree['name']
-  readonly optional: Tree['optional']
-  readonly children: OmitInChildren<Tree['children'], Keys>
-}
-
-type OmitDependencies<Tree, Keys> = Tree extends UnknownDependencyTree
-  ? Tree['name'] extends never
-    ? Step<Tree, Keys>
-    : Tree['name'] extends Keys
-    ? never
-    : Step<Tree, Keys>
-  : never
 
 interface ProvideFn {
-  <Dependencies extends UnknownDependencyTree, Value>(
+  <Dependencies, Value>(
     input: Injectable<Dependencies, Value>
   ): <Keys extends keyof Flatten<Dependencies>>() => Injectable<
-    {
-      readonly [Key in keyof OmitDependencies<
-        Dependencies,
-        Keys
-      >]: OmitDependencies<Dependencies, Keys>[Key]
-    },
+    OmittedTree<Dependencies, Keys>,
     (innerDependencies: {
       readonly [Key in keyof Flatten<Dependencies> as Key extends Keys
         ? Key
